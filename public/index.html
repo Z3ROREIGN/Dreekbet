@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>DreekBet - Apostas Profissionais</title>
+<link rel="stylesheet" href="style.css" />
+<script src="https://www.paypal.com/sdk/js?client-id=EPuaxgu2kNPQr2hIFVo1zihvrkTQQsEkK01z7dxRRl5HhZ2wPDSLICNQPBRC0uPiMVjm2xlqz5JQAlk6&currency=BRL"></script>
+</head>
+<body>
+  <div class="container">
+    <div class="logo">DREEKBET</div>
+
+    <div id="auth-area">
+      <h2>Login / Registro</h2>
+      <input type="email" id="email" placeholder="Email" />
+      <input type="password" id="password" placeholder="Senha" />
+      <button onclick="login()">Entrar</button>
+      <button onclick="register()">Registrar</button>
+      <p id="auth-msg" class="msg"></p>
+    </div>
+
+    <div id="panel" style="display:none;">
+      <div id="saldo-area">Saldo: R$ <span id="saldo-valor">0.00</span></div>
+
+      <h3>Adicionar saldo</h3>
+      <input type="number" id="deposit-amount" placeholder="Valor para depositar (R$)" />
+      <div id="paypal-button-container"></div>
+      <p id="deposit-msg" class="msg"></p>
+
+      <h3>Produtos</h3>
+      <div id="products"></div>
+
+      <h3>Carrinho</h3>
+      <div id="cart"></div>
+      <strong id="total">Total: R$ 0.00</strong>
+
+      <h3>Fazer aposta</h3>
+      <input type="number" id="aposta-valor" placeholder="Valor para apostar (R$)" />
+      <button onclick="apostar()">Apostar</button>
+      <p id="aposta-msg" class="msg"></p>
+
+      <h3>Solicitar saque</h3>
+      <input type="number" id="saque-valor" placeholder="Valor para sacar (R$)" />
+      <button onclick="solicitarSaque()">Sacar</button>
+      <p id="saque-msg" class="msg"></p>
+
+      <button onclick="logout()" style="margin-top:20px;background:#cc0000;">Sair</button>
+    </div>
+  </div>
+
+  <script>
+    let userEmail = null;
+    let saldo = 0;
+    let produtos = [];
+    let carrinho = [];
+
+    async function register() {
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value.trim();
+      if (!email || !password) {
+        showMsg('auth-msg', 'Preencha todos os campos');
+        return;
+      }
+      const res = await fetch('/api/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      const data = await res.json();
+      if (data.success) {
+        showMsg('auth-msg', 'Registrado com sucesso! Faça login.');
+      } else {
+        showMsg('auth-msg', data.error || 'Erro no registro');
+      }
+    }
+
+    async function login() {
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value.trim();
+      if (!email || !password) {
+        showMsg('auth-msg', 'Preencha todos os campos');
+        return;
+      }
+      const res = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+        credentials: 'include'
+      });
+      const data = await res.json();
+      if (data.success) {
+        userEmail = data.email;
+        saldo = data.saldo;
+        document.getElementById('auth-area').style.display = 'none';
+        document.getElementById('panel').style.display = 'block';
+        updateSaldo();
+        loadProdutos();
+        initPayPalButtons();
+        showMsg('auth-msg', '');
+      } else {
+        showMsg('auth-msg', data.error || 'Erro no login');
+      }
+    }
+
+    async function logout() {
+      await fetch('/api/logout', { method: 'POST', credentials: 'include' });
+      userEmail = null;
+      saldo = 0;
+      carrinho = [];
+      produtos = [];
+      document.getElementById('auth-area').style.display = 'block';
+      document.getElementById('panel').style.display = 'none';
+      clearInputs();
+      showMsg('auth-msg', 'Desconectado');
+    }
+
+    function showMsg(id, msg) {
+      document.getElementById(id).innerText = msg;
+    }
+
+    function updateSaldo() {
+      document.getElementById('saldo-valor').innerText = saldo.toFixed(2);
+    }
+
+    async function loadProdutos() {
+      const res = await fetch('/api/produtos', { credentials: 'include' });
+      produtos = await res.json();
+      const productsDiv = document.getElementById('products');
+      productsDiv.innerHTML = '';
+      produtos.forEach(p => {
+        const div = document.createElement('div');
+        div.innerHTML = `
+          <span>${p.nome} - R$ ${p.preco.toFixed(2)}</span>
+          <button onclick="addToCart('${p.id}')">Adicionar</button>
+        `;
+        productsDiv.appendChild(div);
+      });
+    }
+
+    function addToCart(id) {
+      const produto = produtos.find(p => p.id === id);
+      if (!produto) return;
+      carrinho.push(produto);
+      renderCart();
+    }
+
+    function renderCart() {
+      const cartDiv = document.getElementById('cart');
+      cartDiv.innerHTML = '';
+      carrinho.forEach((item, index) => {
+        const div = document.createElement('div');
+        div.innerHTML = `
+          <span>${item.nome} - R$ ${item.preco.toFixed(2)}</span>
+          <button onclick="removeFromCart(${index})">Remover</button>
+        `;
+        cartDiv.appendChild(div);
+      });
+      updateTotal();
+    }
+
+    function removeFromCart(index) {
+      carrinho.splice(index, 1);
+      renderCart();
+    }
+
+    function updateTotal() {
+      const total = carrinho.reduce((acc, cur) => acc + cur.preco, 0);
+      document.getElementById('total').innerText = `Total: R$ ${total.toFixed(2)}`;
+    }
+
+    async function apostar() {
+      const valor = parseFloat(document.getElementById('aposta-valor').value);
+      if (isNaN(valor) || valor <= 0) {
+        showMsg('aposta-msg', 'Digite um valor válido para apostar');
+        return;
+      }
+      if (valor > saldo) {
+        showMsg('aposta-msg', 'Saldo insuficiente');
+        return;
+      }
+      const res = await fetch('/api/apostar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ valor }),
+        credentials: 'include'
+      });
+      const data = await res.json();
+      if (data.success) {
+        saldo = await atualizarSaldo();
+        showMsg('aposta-msg', data.ganhou ? 'Parabéns! Você ganhou a aposta!' : 'Você perdeu a aposta. Tente novamente!');
+        updateSaldo();
+      } else {
+        showMsg('aposta-msg', data.error || 'Erro na aposta');
+      }
+    }
+
+    async function solicitarSaque() {
+      const valor = parseFloat(document.getElementById('saque-valor').value);
+      if (isNaN(valor) || valor <= 0) {
+        showMsg('saque-msg', 'Digite um valor válido para saque');
+        return;
+      }
+      if (valor > saldo) {
+        showMsg('saque-msg', 'Saldo insuficiente');
+        return;
+      }
+      const res = await fetch('/api/saque', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ valor }),
+        credentials: 'include'
+      });
+      const data = await res.json();
+      if (data.success) {
+        saldo = await atualizarSaldo();
+        showMsg('saque-msg', `Saque solicitado. Valor líquido: R$ ${data.valorLiquido.toFixed(2)}`);
+        updateSaldo();
+      } else {
+        showMsg('saque-msg', data.error || 'Erro no saque');
+      }
+    }
+
+    async function atualizarSaldo() {
+      const res = await fetch('/api/saldo', { credentials: 'include' });
+      const data = await res.json();
+      saldo = data.saldo;
+      updateSaldo();
+      return saldo;
+    }
+
+    function clearInputs() {
+      document.getElementById('email').value = '';
+      document.getElementById('password').value = '';
+      document.getElementById('deposit-amount').value = '';
+      document.getElementById('aposta-valor').value = '';
+      document.getElementById('saque-valor').value = '';
+      carrinho = [];
+      renderCart();
+      showMsg('deposit-msg', '');
+      showMsg('aposta-msg', '');
+      showMsg('saque-msg', '');
+    }
+
+    function initPayPalButtons() {
+      const amountInput = document.getElementById('deposit-amount');
+      const depositMsg = document.getElementById('deposit-msg');
+      if (!window.paypal) return;
+
+      paypal.Buttons({
+        createOrder: function(data, actions) {
+          const amount = parseFloat(amountInput.value);
+          if (!amount || amount <= 0) {
+            depositMsg.innerText = 'Digite um valor válido para depositar';
+            return actions.reject();
+          }
+          return actions.order.create({
+            purchase_units: [{
+              amount: {
+                value: amount.toFixed(2)
+              }
+            }]
+          });
+        },
+        onApprove: function(data, actions) {
+          return actions.order.capture().then(async function(details) {
+            // Aqui você deve informar ao backend que o pagamento foi aprovado
+            // para adicionar saldo no usuário
+            const amount = parseFloat(amountInput.value);
+            const res = await fetch('/api/add-saldo', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ amount }),
+              credentials: 'include'
+            });
+            const data = await res.json();
+            if (data.success) {
+              saldo = await atualizarSaldo();
+              depositMsg.innerText = 'Saldo adicionado com sucesso!';
+              amountInput.value = '';
+              updateSaldo();
+            } else {
+              depositMsg.innerText = 'Erro ao adicionar saldo';
+            }
+          });
+        }
+      }).render('#paypal-button-container');
+    }
+  </script>
+</body>
+  </html>
+  
