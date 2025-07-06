@@ -47,14 +47,17 @@
     border: none;
     border-radius: 6px;
     color: white;
-    cursor: not-allowed;
+    cursor: pointer;
     font-size: 16px;
     font-weight: 600;
-    opacity: 0.6;
     transition: background-color 0.3s ease;
   }
   .btn:hover:not(:disabled) {
     background: #5b6eae;
+  }
+  .btn:disabled {
+    background: #99aab5;
+    cursor: not-allowed;
   }
   .message {
     margin-top: 15px;
@@ -73,7 +76,6 @@
 </div>
 
 <script>
-  // Backend do Railway configurado aqui
   const BACKEND_URL = 'https://dreekbet-production-4f05.up.railway.app';
 
   function redirectToDiscord() {
