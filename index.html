@@ -1,177 +1,138 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<title>DreekBet</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>DreekBet - Painel</title>
 <style>
-body {
-  margin: 0;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: #2c2f33;
-  color: #fff;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-}
-.container {
-  background: #23272a;
-  border-radius: 8px;
-  padding: 20px;
-  text-align: center;
-  box-shadow: 0 0 10px #000;
-  max-width: 400px;
-  width: 90%;
-}
-.avatar {
-  border-radius: 50%;
-  margin-bottom: 10px;
-  box-shadow: 0 0 5px #000;
-}
-h2 {
-  margin: 10px 0 5px;
-  color: #7289da;
-}
-p {
-  margin: 0;
-  color: #b9bbbe;
-}
-.btn {
-  margin-top: 20px;
-  padding: 10px 20px;
-  background: #7289da;
-  border: none;
-  border-radius: 4px;
-  color: white;
-  cursor: pointer;
-  font-size: 16px;
-}
-.btn:hover {
-  background: #5b6eae;
-}
-.message {
-  margin-top: 15px;
-  padding: 10px;
-  background: #99aab5;
-  border-radius: 4px;
-  color: #23272a;
-  font-weight: bold;
-  display: none;
-}
-.loader {
-  border: 8px solid #444;
-  border-top: 8px solid #7289da;
-  border-radius: 50%;
-  width: 60px;
-  height: 60px;
-  animation: spin 1s linear infinite;
-  margin: 20px auto;
-}
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
+  body {
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #2c2f33;
+    color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+  }
+  .container {
+    background: #23272a;
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 0 10px #000;
+    max-width: 400px;
+    width: 90%;
+  }
+  .avatar {
+    border-radius: 50%;
+    margin-bottom: 10px;
+    box-shadow: 0 0 5px #000;
+  }
+  h2 {
+    margin: 10px 0 5px;
+    color: #7289da;
+  }
+  p {
+    margin: 0;
+    color: #b9bbbe;
+  }
+  .btn {
+    margin-top: 20px;
+    padding: 10px 20px;
+    background: #7289da;
+    border: none;
+    border-radius: 4px;
+    color: white;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+  }
+  .btn:hover:not(:disabled) {
+    background: #5b6eae;
+  }
+  .btn:disabled {
+    background: #99aab5;
+    cursor: not-allowed;
+  }
+  .message {
+    margin-top: 15px;
+    padding: 10px;
+    background: #99aab5;
+    border-radius: 4px;
+    color: #23272a;
+    font-weight: bold;
+    display: none;
+  }
 </style>
 </head>
 <body>
 <div id="content" class="container">
-  <div class="loader"></div>
-  <p>Carregando…</p>
+  <p>Carregando...</p>
 </div>
 
 <script>
-const SECRET_FILE = '2038402840274923747394758294729472957295729572957385394739573957395739573947395834948398593848593753047583927492470192474829.html';
-const content = document.getElementById('content');
+  // Backend do Railway configurado aqui
+  const BACKEND_URL = 'https://dreekbet-production.up.railway.app';
 
-async function loadSecrets() {
-  const res = await fetch(SECRET_FILE);
-  return await res.json();
-}
+  function redirectToDiscord() {
+    window.location.href = `${BACKEND_URL}/login`;
+  }
 
-function getCodeFromUrl() {
-  const params = new URLSearchParams(window.location.search);
-  return params.get('code');
-}
+  async function getUserInfo(code) {
+    const res = await fetch(`${BACKEND_URL}/auth`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code })
+    });
 
-function redirectToDiscord(client_id, redirect_uri, scope) {
-  const url = `https://discord.com/api/oauth2/authorize?client_id=${client_id}&redirect_uri=${encodeURIComponent(redirect_uri)}&response_type=code&scope=${scope}`;
-  window.location.href = url;
-}
+    if (!res.ok) throw new Error('Falha ao obter dados do usuário');
 
-async function fetchToken(client_id, client_secret, code, redirect_uri, scope) {
-  const data = new URLSearchParams({
-    client_id,
-    client_secret,
-    grant_type: 'authorization_code',
-    code,
-    redirect_uri,
-    scope
-  });
+    return await res.json();
+  }
 
-  const response = await fetch('https://discord.com/api/oauth2/token', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: data
-  });
-
-  if (!response.ok) throw new Error('Erro ao pegar token');
-  return response.json();
-}
-
-async function fetchUserData(token) {
-  const response = await fetch('https://discord.com/api/users/@me', {
-    headers: { Authorization: `Bearer ${token}` }
-  });
-
-  if (!response.ok) throw new Error('Erro ao pegar dados do usuário');
-  return response.json();
-}
-
-function apostar() {
-  const msg = document.getElementById('msg');
-  msg.style.display = 'block';
-  msg.textContent = '🎲 Apostas indisponíveis no momento. Tente mais tarde!';
-}
-
-async function main() {
-  content.innerHTML = `
-    <div class="loader"></div>
-    <p>Carregando segredos…</p>
-  `;
-
-  try {
-    const { client_id, client_secret, redirect_uri, scope } = await loadSecrets();
-    const code = getCodeFromUrl();
-
-    if (!code) {
-      redirectToDiscord(client_id, redirect_uri, scope);
-      return;
-    }
-
-    content.innerHTML = `
-      <div class="loader"></div>
-      <p>Carregando painel…</p>
-    `;
-
-    const tokenData = await fetchToken(client_id, client_secret, code, redirect_uri, scope);
-    const user = await fetchUserData(tokenData.access_token);
-
+  function showUserPanel(user) {
+    const content = document.getElementById('content');
     content.innerHTML = `
       <img class="avatar" src="https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png" alt="Avatar" width="128" />
       <h2>${user.username}#${user.discriminator}</h2>
       <p>ID: ${user.id}</p>
-      <button class="btn" onclick="apostar()">🎲 Apostar</button>
-      <div id="msg" class="message">Apostas indisponíveis no momento. Tente mais tarde!</div>
+      <button id="btnApostar" class="btn">🎲 Apostar</button>
+      <div id="msg" class="message"></div>
     `;
 
-    window.history.replaceState({}, document.title, window.location.pathname);
+    const btn = document.getElementById('btnApostar');
+    const msg = document.getElementById('msg');
 
-  } catch (err) {
-    content.innerHTML = `<p>❌ Erro: ${err.message}</p>`;
+    btn.addEventListener('click', () => {
+      btn.disabled = true;
+      msg.style.display = 'block';
+      msg.textContent = '🎲 Apostas indisponíveis no momento. Tente mais tarde!';
+    });
   }
-}
 
-main();
+  async function main() {
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get('code');
+
+    if (!code) {
+      redirectToDiscord();
+      return;
+    }
+
+    const content = document.getElementById('content');
+    content.innerHTML = '<p>Carregando dados do usuário...</p>';
+
+    try {
+      const user = await getUserInfo(code);
+      showUserPanel(user);
+      window.history.replaceState({}, document.title, window.location.pathname);
+    } catch (err) {
+      content.innerHTML = `<p>❌ Erro: ${err.message}</p>`;
+    }
+  }
+
+  main();
 </script>
 </body>
 </html>
