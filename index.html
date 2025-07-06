@@ -18,16 +18,18 @@
   .container {
     background: #23272a;
     border-radius: 8px;
-    padding: 20px;
+    padding: 25px;
     text-align: center;
-    box-shadow: 0 0 10px #000;
+    box-shadow: 0 0 15px #000;
     max-width: 400px;
     width: 90%;
   }
   .avatar {
     border-radius: 50%;
-    margin-bottom: 10px;
-    box-shadow: 0 0 5px #000;
+    margin-bottom: 15px;
+    box-shadow: 0 0 10px #000;
+    width: 128px;
+    height: 128px;
   }
   h2 {
     margin: 10px 0 5px;
@@ -36,30 +38,29 @@
   p {
     margin: 0;
     color: #b9bbbe;
+    font-size: 14px;
   }
   .btn {
-    margin-top: 20px;
-    padding: 10px 20px;
+    margin-top: 25px;
+    padding: 12px 30px;
     background: #7289da;
     border: none;
-    border-radius: 4px;
+    border-radius: 6px;
     color: white;
-    cursor: pointer;
+    cursor: not-allowed;
     font-size: 16px;
+    font-weight: 600;
+    opacity: 0.6;
     transition: background-color 0.3s ease;
   }
   .btn:hover:not(:disabled) {
     background: #5b6eae;
   }
-  .btn:disabled {
-    background: #99aab5;
-    cursor: not-allowed;
-  }
   .message {
     margin-top: 15px;
     padding: 10px;
     background: #99aab5;
-    border-radius: 4px;
+    border-radius: 6px;
     color: #23272a;
     font-weight: bold;
     display: none;
@@ -73,7 +74,7 @@
 
 <script>
   // Backend do Railway configurado aqui
-  const BACKEND_URL = 'https://dreekbet-production.up.railway.app';
+  const BACKEND_URL = 'https://dreekbet-production-4f05.up.railway.app';
 
   function redirectToDiscord() {
     window.location.href = `${BACKEND_URL}/login`;
@@ -94,10 +95,10 @@
   function showUserPanel(user) {
     const content = document.getElementById('content');
     content.innerHTML = `
-      <img class="avatar" src="https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png" alt="Avatar" width="128" />
+      <img class="avatar" src="https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png" alt="Avatar" width="128" height="128" onerror="this.onerror=null;this.src='https://cdn.discordapp.com/embed/avatars/0.png'"/>
       <h2>${user.username}#${user.discriminator}</h2>
       <p>ID: ${user.id}</p>
-      <button id="btnApostar" class="btn">🎲 Apostar</button>
+      <button id="btnApostar" class="btn" disabled>🎲 Apostar</button>
       <div id="msg" class="message"></div>
     `;
 
