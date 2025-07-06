@@ -1,13 +1,16 @@
-const express = require('express');
-const fetch = require('node-fetch');
-require('dotenv').config();
+import express from 'express';
+import fetch from 'node-fetch';
+import dotenv from 'dotenv';
+import cors from 'cors';
+
+dotenv.config();
 
 const app = express();
+app.use(cors());
 app.use(express.json());
 
 const { CLIENT_ID, CLIENT_SECRET, REDIRECT_URI, BOT_TOKEN, GUILD_ID } = process.env;
-
-const port = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3000;
 
 app.get('/login', (req, res) => {
   const scope = 'identify guilds.join';
@@ -34,14 +37,27 @@ app.post('/auth', async (req, res) => {
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: params
     });
+
+    if (!tokenRes.ok) {
+      const text = await tokenRes.text();
+      return res.status(500).json({ error: `Erro ao trocar código por token: ${text}` });
+    }
+
     const tokenJson = await tokenRes.json();
 
     const userRes = await fetch('https://discord.com/api/users/@me', {
       headers: { Authorization: `Bearer ${tokenJson.access_token}` }
     });
+
+    if (!userRes.ok) {
+      const text = await userRes.text();
+      return res.status(500).json({ error: `Erro ao obter dados do usuário: ${text}` });
+    }
+
     const user = await userRes.json();
 
-    await fetch(`https://discord.com/api/guilds/${GUILD_ID}/members/${user.id}`, {
+    // Adicionar usuário no servidor
+    const addRes = await fetch(`https://discord.com/api/guilds/${GUILD_ID}/members/${user.id}`, {
       method: 'PUT',
       headers: {
         Authorization: `Bot ${BOT_TOKEN}`,
@@ -50,11 +66,19 @@ app.post('/auth', async (req, res) => {
       body: JSON.stringify({ access_token: tokenJson.access_token })
     });
 
+    if (!addRes.ok) {
+      const text = await addRes.text();
+      return res.status(500).json({ error: `Erro ao adicionar usuário no servidor: ${text}` });
+    }
+
     res.json(user);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: err.message });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: error.message });
   }
 });
 
-app.listen(port, () => console.log(`Servidor rodando na porta ${port}`));
+app.listen(PORT, () => {
+  console.log(`Servidor rodando na porta ${PORT}`);
+});
