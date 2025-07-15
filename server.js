@@ -2,54 +2,25 @@ import express from "express";
 import cors from "cors";
 import bodyParser from "body-parser";
 import fetch from "node-fetch";
-import path from "path";
-import { fileURLToPath } from "url";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
 app.use(cors());
 app.use(bodyParser.json());
-app.use(express.static(__dirname)); // Serve arquivos estáticos da raiz
 
+// Variáveis de ambiente obrigatórias
 const CLIENT_ID = process.env.DISCORD_CLIENT_ID;
 const CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET;
 const REDIRECT_URI = process.env.DISCORD_REDIRECT_URI; // ex: https://dreekbet.shop
-const BOT_TOKEN = process.env.DISCORD_BOT_TOKEN;
-const ADMIN_ROLE_ID = process.env.DISCORD_ADMIN_ROLE_ID;
-const GUILD_ID = process.env.DISCORD_GUILD_ID; // seu servidor Discord
+const BOT_TOKEN = process.env.DISCORD_BOT_TOKEN; // seu token de bot para consultar cargos e interagir com Discloud
+const DISCLOUD_API_KEY = process.env.DISCLOUD_API_KEY; // API key da Discloud para hospedar bots
+const GUILD_ID = process.env.DISCORD_GUILD_ID; // ID do seu servidor Discord onde verifica cargos
+const ADMIN_ROLE_ID = process.env.DISCORD_ADMIN_ROLE_ID; // ID do cargo que libera admin no painel
 
-const users = {};
-const admins = new Set();
-
-app.get("/login", (req, res) => {
-  const authURL = `https://discord.com/api/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(
-    REDIRECT_URI
-  )}&response_type=code&scope=identify`;
-  res.redirect(authURL);
-});
-
-app.get("/logout", (req, res) => {
-  // Apenas redireciona para a raiz sem código, "desloga"
-  res.redirect("/");
-});
-
-async function isAdmin(userId) {
-  try {
-    const res = await fetch(
-      `https://discord.com/api/guilds/${GUILD_ID}/members/${userId}`,
-      { headers: { Authorization: `Bot ${BOT_TOKEN}` } }
-    );
-    if (!res.ok) return false;
-    const member = await res.json();
-    return member.roles.includes(ADMIN_ROLE_ID);
-  } catch {
-    return false;
-  }
-}
+// Armazena dados em memória simples (para testar, no real precisa banco de dados)
+const userBotMap = new Map(); // userId -> { botId, paymentStatus, ... }
+const supportChats = new Map(); // userId -> [{from, message, timestamp}]
 
 app.post("/auth", async (req, res) => {
   const { code } = req.body;
@@ -72,60 +43,127 @@ app.post("/auth", async (req, res) => {
     if (!tokenData.access_token)
       return res.status(400).json({ error: "Falha no token" });
 
+    // Pega dados do usuário
     const userRes = await fetch("https://discord.com/api/users/@me", {
       headers: { Authorization: `Bearer ${tokenData.access_token}` },
     });
     const userData = await userRes.json();
 
-    const adminCheck = await isAdmin(userData.id);
-    if (adminCheck) admins.add(userData.id);
+    // Verifica se usuário tem cargo admin no servidor
+    const isAdmin = await checkUserAdmin(userData.id);
 
-    if (!users[userData.id]) {
-      users[userData.id] = {
-        paidSlots: 0,
-        bots: [],
-        accessGranted: false,
-        messages: [],
-      };
-    }
-
-    res.json({
-      user: userData,
-      isAdmin: adminCheck,
-      paidSlots: users[userData.id].paidSlots,
-      accessGranted: users[userData.id].accessGranted,
-    });
+    res.json({ ...userData, isAdmin });
   } catch (err) {
     res.status(500).json({ error: "Erro no servidor" });
   }
 });
 
-// Rotas exemplo para manipular bots
+async function checkUserAdmin(userId) {
+  try {
+    const res = await fetch(`https://discord.com/api/guilds/${GUILD_ID}/members/${userId}`, {
+      headers: { Authorization: `Bot ${BOT_TOKEN}` },
+    });
+    if (!res.ok) return false;
+    const memberData = await res.json();
+    return memberData.roles.includes(ADMIN_ROLE_ID);
+  } catch {
+    return false;
+  }
+}
 
+// Rota que retorna os bots do usuário (só o bot dele)
 app.get("/bots/:userId", (req, res) => {
-  const userId = req.params.userId;
-  if (!users[userId]) return res.json({ bots: [] });
-  res.json({ bots: users[userId].bots });
+  const { userId } = req.params;
+  if (!userBotMap.has(userId))
+    return res.json({ bots: [] });
+
+  const botData = userBotMap.get(userId);
+  res.json({ bots: [botData] });
 });
 
-app.post("/bots/:botId/start", (req, res) => {
-  // Aqui você chama a API da Discloud para iniciar o bot
-  res.json({ message: "Bot iniciado (simulado)" });
+// Hospedar bot (só 1 por usuário e precisa pagamento liberado)
+app.post("/bots/:userId/host", async (req, res) => {
+  const { userId } = req.params;
+  // Verifique se tem pagamento válido — aqui só simulo
+  const botExist = userBotMap.has(userId);
+  if (botExist) return res.status(400).json({ error: "Você já tem um bot hospedado." });
+
+  // TODO: Receber o .zip do bot e enviar para Discloud via API (aqui é só simulação)
+  // Exemplo: 
+  // const botName = req.body.name;
+  // const zipFileBase64 = req.body.zip;
+  // ... enviar para Discloud com a API Key ...
+
+  // Simula criação bot
+  const botId = `bot_${Date.now()}`;
+  const botData = {
+    id: botId,
+    name: "Meu Bot",
+    status: "offline",
+    ramUsage: null,
+    paymentStatus: true,
+  };
+  userBotMap.set(userId, botData);
+  res.json({ success: true, bot: botData });
 });
 
-app.post("/bots/:botId/stop", (req, res) => {
-  // Aqui você chama a API da Discloud para parar o bot
-  res.json({ message: "Bot parado (simulado)" });
+// Iniciar bot
+app.post("/bots/:botId/start", async (req, res) => {
+  const botId = req.params.botId;
+  const botEntry = [...userBotMap.values()].find(b => b.id === botId);
+  if (!botEntry) return res.status(404).json({ error: "Bot não encontrado" });
+
+  // Aqui você deve chamar API da Discloud para iniciar o bot (exemplo)
+  // Simulando:
+  botEntry.status = "online";
+  botEntry.ramUsage = "45MB";
+  res.json({ success: true });
 });
 
+// Parar bot
+app.post("/bots/:botId/stop", async (req, res) => {
+  const botId = req.params.botId;
+  const botEntry = [...userBotMap.values()].find(b => b.id === botId);
+  if (!botEntry) return res.status(404).json({ error: "Bot não encontrado" });
+
+  // Simule parada do bot
+  botEntry.status = "offline";
+  botEntry.ramUsage = null;
+  res.json({ success: true });
+});
+
+// Remover bot
 app.delete("/bots/:botId", (req, res) => {
-  // Aqui você chama a API da Discloud para remover o bot
-  res.json({ message: "Bot removido (simulado)" });
+  const botId = req.params.botId;
+  for (const [userId, botData] of userBotMap.entries()) {
+    if (botData.id === botId) {
+      userBotMap.delete(userId);
+      return res.json({ success: true });
+    }
+  }
+  res.status(404).json({ error: "Bot não encontrado" });
 });
 
-// Serve index.html para todas as outras rotas (SPA)
-app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "index.html"));
+// Chat suporte - obter mensagens
+app.get("/support/:userId", (req, res) => {
+  const { userId } = req.params;
+  const msgs = supportChats.get(userId) || [];
+  res.json({ messages: msgs });
+});
+
+// Chat suporte - enviar mensagem
+app.post("/support/:userId", (req, res) => {
+  const { userId } = req.params;
+  const { message } = req.body;
+  if (!message) return res.status(400).json({ error: "Mensagem é obrigatória" });
+
+  const msgs = supportChats.get(userId) || [];
+  msgs.push({ from: "Cliente", message, timestamp: Date.now() });
+  supportChats.set(userId, msgs);
+
+  // Aqui você poderia enviar notificação para admin via Discord, webhook etc (não incluído)
+
+  res.json({ success: true });
 });
 
 app.listen(PORT, () => {
