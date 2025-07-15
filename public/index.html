@@ -4,6 +4,14 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>DreekBet 🌐</title>
+<script>
+  window.onload = () => {
+    // Se tiver cookie já vai para o painel
+    if (document.cookie.includes("user=")) {
+      window.location.href = "/api/painel";
+    }
+  }
+</script>
 <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gradient-to-br from-gray-800 to-gray-900 text-white min-h-screen flex flex-col justify-center items-center">
