@@ -1,7 +1,7 @@
 {
   "name": "dreekbet-panel",
   "version": "1.0.0",
-  "description": "Painel de hospedagem de bots com OAuth2 Discord",
+  "description": "Painel de hospedagem de bots Discord",
   "main": "server.js",
   "type": "module",
   "scripts": {
