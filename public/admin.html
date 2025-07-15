@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Admin</title>
+<style>
+body { background: #2c2f33; color: #fff; font-family: Arial; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
+.container { background: #23272a; border-radius: 8px; padding: 20px; text-align: center; box-shadow: 0 0 15px #000; max-width: 600px; width: 90%; }
+pre { text-align: left; background: #000; padding: 10px; overflow: auto; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Admin Painel</h1>
+  <pre id="dados">Carregando...</pre>
+</div>
+
+<script>
+fetch("/api/admin")
+  .then(res => res.json())
+  .then(data => {
+    document.getElementById("dados").textContent = JSON.stringify(data, null, 2);
+  });
+</script>
+</body>
+</html>
