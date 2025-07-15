@@ -1,38 +1,16 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<title>DreekBet Applications 🌐</title>
-<style>
-body {
-  margin: 0; font-family: Arial, sans-serif;
-  background: linear-gradient(135deg, #2c2f33, #23272a);
-  color: #fff; text-align: center;
-}
-header {
-  background: #7289da;
-  padding: 20px; font-size: 24px;
-  text-shadow: 1px 1px #000;
-}
-.banner {
-  margin: 20px;
-  font-size: 20px;
-  color: #b9bbbe;
-}
-.btn {
-  background: #7289da; color: #fff; text-decoration: none;
-  display: inline-block; margin: 20px; padding: 12px 24px;
-  border-radius: 4px; transition: .3s; font-size: 16px;
-}
-.btn:hover { background: #5b6eae; }
-</style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>DreekBet 🌐</title>
+<script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-
-<header>🌐 DreekBet Applications</header>
-<div class="banner">✨ Aposte nas suas aplicações!</div>
-
-<a class="btn" href="/api/auth">Login com Discord</a>
-
+<body class="bg-gradient-to-br from-gray-800 to-gray-900 text-white min-h-screen flex flex-col justify-center items-center">
+  <header class="text-4xl font-bold mb-8 text-indigo-400">🌐 DreekBet Applications</header>
+  <p class="text-lg text-gray-300 mb-6">✨ Aposte nas suas aplicações com estilo!</p>
+  <a href="/api/auth" class="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-3 rounded-lg text-lg shadow">
+    Login com Discord
+  </a>
 </body>
 </html>
