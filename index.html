@@ -1,316 +1,653 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" >
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>DreekBet - Painel</title>
-<style>
-  body {
-    margin: 0;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: #2c2f33;
-    color: #fff;
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    min-height: 100vh;
-    padding: 20px;
-  }
-  .container {
-    background: #23272a;
-    border-radius: 8px;
-    padding: 25px;
-    box-shadow: 0 0 15px #000;
-    max-width: 700px;
-    width: 100%;
-  }
-  .avatar {
-    border-radius: 50%;
-    box-shadow: 0 0 10px #000;
-    width: 96px;
-    height: 96px;
-  }
-  h2 {
-    margin: 10px 0 5px;
-    color: #7289da;
-  }
-  p {
-    margin: 0;
-    color: #b9bbbe;
-    font-size: 14px;
-  }
-  .btn {
-    margin-top: 15px;
-    padding: 10px 20px;
-    background: #7289da;
-    border: none;
-    border-radius: 6px;
-    color: white;
-    cursor: pointer;
-    font-weight: 600;
-    transition: background-color 0.3s ease;
-  }
-  .btn:hover:not(:disabled) {
-    background: #5b6eae;
-  }
-  .btn:disabled {
-    background: #99aab5;
-    cursor: not-allowed;
-  }
-  #botsList {
-    margin-top: 20px;
-  }
-  .bot-card {
-    background: #2c2f33;
-    border-radius: 6px;
-    padding: 15px;
-    margin-bottom: 12px;
-    box-shadow: 0 0 5px #000;
-  }
-  .bot-card strong {
-    font-size: 16px;
-    color: #fff;
-  }
-  .bot-actions button {
-    margin-right: 10px;
-    padding: 6px 12px;
-    border: none;
-    border-radius: 5px;
-    background: #7289da;
-    color: white;
-    cursor: pointer;
-    font-weight: 600;
-    transition: background-color 0.3s ease;
-  }
-  .bot-actions button:hover {
-    background: #5b6eae;
-  }
-  #supportChat {
-    margin-top: 25px;
-    background: #2c2f33;
-    padding: 15px;
-    border-radius: 6px;
-    max-height: 300px;
-    overflow-y: auto;
-  }
-  #supportChat div {
-    margin-bottom: 10px;
-  }
-  #supportInput {
-    width: calc(100% - 110px);
-    padding: 8px;
-    border-radius: 4px;
-    border: none;
-    margin-right: 8px;
-  }
-  #sendMsgBtn {
-    padding: 8px 15px;
-    border: none;
-    border-radius: 4px;
-    background: #7289da;
-    color: white;
-    cursor: pointer;
-  }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>DreekBet - Painel</title>
+  <style>
+    /* Reset */
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #2c2f33;
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 15px;
+    }
+    header {
+      width: 100%;
+      max-width: 900px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+      border-bottom: 2px solid #7289da;
+      padding-bottom: 10px;
+    }
+    header h1 {
+      margin: 0;
+      color: #7289da;
+    }
+    #btnLogout {
+      background: #f04747;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 5px;
+      color: white;
+      cursor: pointer;
+      font-weight: 600;
+      transition: background-color 0.3s ease;
+    }
+    #btnLogout:hover {
+      background: #b93636;
+    }
+    main {
+      flex: 1;
+      width: 100%;
+      max-width: 900px;
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .panel {
+      background: #23272a;
+      border-radius: 8px;
+      padding: 20px;
+      flex: 1 1 400px;
+      box-shadow: 0 0 12px #000;
+      display: flex;
+      flex-direction: column;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+    .panel h2 {
+      margin-top: 0;
+      color: #7289da;
+      margin-bottom: 15px;
+    }
+    .user-info {
+      text-align: center;
+      margin-bottom: 15px;
+    }
+    .user-info img {
+      border-radius: 50%;
+      width: 128px;
+      height: 128px;
+      box-shadow: 0 0 10px #000;
+      margin-bottom: 10px;
+    }
+    .user-info p {
+      margin: 3px 0;
+      font-weight: 600;
+    }
+    button.btn {
+      background: #7289da;
+      border: none;
+      border-radius: 6px;
+      color: white;
+      padding: 10px 20px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      margin-top: 10px;
+    }
+    button.btn:disabled {
+      background: #99aab5;
+      cursor: not-allowed;
+    }
+    button.btn:hover:not(:disabled) {
+      background: #5b6eae;
+    }
+    input[type="file"] {
+      margin-top: 10px;
+      color: #ddd;
+    }
+    .message {
+      background: #99aab5;
+      color: #23272a;
+      font-weight: bold;
+      padding: 10px;
+      border-radius: 6px;
+      margin-top: 10px;
+      display: none;
+    }
+    .bots-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .bots-list li {
+      background: #2c2f33;
+      padding: 10px;
+      margin-bottom: 8px;
+      border-radius: 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .bots-list li span {
+      font-weight: 600;
+    }
+    .support-chat {
+      flex-direction: column;
+      display: flex;
+      height: 100%;
+    }
+    .messages {
+      flex: 1;
+      overflow-y: auto;
+      background: #1c1e21;
+      padding: 10px;
+      border-radius: 6px;
+      margin-bottom: 10px;
+      font-size: 14px;
+    }
+    .messages .msg {
+      margin-bottom: 8px;
+    }
+    .messages .msg.user {
+      color: #7289da;
+    }
+    .messages .msg.admin {
+      color: #43b581;
+    }
+    textarea#supportMessage {
+      width: 100%;
+      height: 60px;
+      border-radius: 6px;
+      border: none;
+      padding: 8px;
+      font-size: 14px;
+      resize: none;
+    }
+    #loginScreen {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      flex: 1;
+      gap: 20px;
+      max-width: 400px;
+      margin: auto;
+    }
+    #loginScreen button {
+      background: #7289da;
+      border: none;
+      border-radius: 6px;
+      color: white;
+      font-weight: 700;
+      padding: 12px 25px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    #loginScreen button:hover {
+      background: #5b6eae;
+    }
+    #pixInfo {
+      margin-top: 15px;
+      background: #23272a;
+      padding: 10px;
+      border-radius: 6px;
+      font-size: 14px;
+      text-align: center;
+    }
+    #adminPanel h3 {
+      margin-top: 0;
+      color: #43b581;
+      margin-bottom: 10px;
+    }
+    #adminPanel button {
+      margin-top: 5px;
+    }
+  </style>
 </head>
 <body>
-<div class="container" id="content">
-  <p>Carregando...</p>
+<header>
+  <h1>DreekBet - Painel</h1>
+  <button id="btnLogout" style="display:none">Sair</button>
+</header>
+
+<div id="loginScreen">
+  <p>Faça login com seu Discord para continuar.</p>
+  <button id="btnLogin">Login com Discord</button>
 </div>
 
-<script>
-  const CLIENT_ID = "SEU_CLIENT_ID_DISCORD_AQUI"; // Troque pelo seu client ID
-  const REDIRECT_URI = window.location.origin;    // Ex: https://dreekbet.shop
-  const OAUTH2_URL = `https://discord.com/api/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=code&scope=identify`;
+<main style="display:none">
+  <section class="panel" id="userPanel">
+    <h2>Seu Painel</h2>
+    <div class="user-info" id="userInfo"></div>
+    <div id="botSection"></div>
+    <div id="paymentSection"></div>
+    <div id="uploadSection" style="display:none">
+      <p>Envie o arquivo ZIP do seu bot Python (obrigatório Python):</p>
+      <input type="file" id="botZipFile" accept=".zip" />
+      <button id="btnUpload" class="btn" disabled>Enviar Bot</button>
+      <div class="message" id="uploadMessage"></div>
+    </div>
+    <div id="supportSection" class="support-chat" style="display:none; margin-top:15px;">
+      <h3>Chat de Suporte</h3>
+      <div class="messages" id="messages"></div>
+      <textarea id="supportMessage" placeholder="Digite sua mensagem..."></textarea>
+      <button id="btnSendMsg" class="btn">Enviar</button>
+    </div>
+  </section>
 
+  <section class="panel" id="adminPanel" style="display:none;">
+    <h2>Administração</h2>
+
+    <div id="pendingPaymentsSection">
+      <h3>Pagamentos Pendentes</h3>
+      <ul id="pendingPaymentsList"></ul>
+    </div>
+
+    <div id="pendingHostsSection" style="margin-top:20px;">
+      <h3>Pedidos de Hospedagem</h3>
+      <ul id="pendingHostsList"></ul>
+    </div>
+
+    <div id="supportAdminSection" style="margin-top:20px;">
+      <h3>Mensagens de Suporte</h3>
+      <ul id="supportUsersList"></ul>
+      <div id="supportUserChat" style="display:none; margin-top:10px;">
+        <h4 id="chatWithUser"></h4>
+        <div class="messages" id="adminMessages" style="height:200px;"></div>
+        <textarea id="adminSupportMessage" placeholder="Digite sua resposta..."></textarea>
+        <button id="btnAdminSendMsg" class="btn">Responder</button>
+        <button id="btnCloseChat" class="btn" style="background:#f04747; margin-top:8px;">Fechar Chat</button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>
   const BACKEND_URL = window.location.origin;
 
-  // Redireciona para o OAuth2 direto no Discord se não tiver o code
-  function redirectToDiscord() {
-    window.location.href = OAUTH2_URL;
-  }
+  let userData = null;
+  let currentSupportUserId = null;
 
-  // Troca o code por info do usuário
-  async function getUserInfo(code) {
-    const res = await fetch(`${BACKEND_URL}/auth`, {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({ code }),
-    });
-    if (!res.ok) throw new Error('Falha ao obter dados do usuário');
-    return await res.json();
-  }
+  const loginScreen = document.getElementById("loginScreen");
+  const mainPanel = document.querySelector("main");
+  const btnLogin = document.getElementById("btnLogin");
+  const btnLogout = document.getElementById("btnLogout");
 
-  // Pega bots do usuário
-  async function getBots(userId) {
-    const res = await fetch(`${BACKEND_URL}/bots/${userId}`);
-    if (!res.ok) throw new Error('Falha ao carregar bots');
-    return await res.json();
-  }
+  const userInfoDiv = document.getElementById("userInfo");
+  const botSection = document.getElementById("botSection");
+  const paymentSection = document.getElementById("paymentSection");
+  const uploadSection = document.getElementById("uploadSection");
+  const uploadMessage = document.getElementById("uploadMessage");
+  const botZipFile = document.getElementById("botZipFile");
+  const btnUpload = document.getElementById("btnUpload");
 
-  // Iniciar bot via backend
-  async function startBot(botId) {
-    const res = await fetch(`${BACKEND_URL}/bots/${botId}/start`, { method: 'POST' });
-    if (res.ok) alert('Bot iniciado!');
-    else alert('Erro ao iniciar bot');
-    loadBots();
-  }
+  const supportSection = document.getElementById("supportSection");
+  const messagesDiv = document.getElementById("messages");
+  const supportMessageInput = document.getElementById("supportMessage");
+  const btnSendMsg = document.getElementById("btnSendMsg");
 
-  // Parar bot via backend
-  async function stopBot(botId) {
-    const res = await fetch(`${BACKEND_URL}/bots/${botId}/stop`, { method: 'POST' });
-    if (res.ok) alert('Bot parado!');
-    else alert('Erro ao parar bot');
-    loadBots();
-  }
+  const adminPanel = document.getElementById("adminPanel");
+  const pendingPaymentsList = document.getElementById("pendingPaymentsList");
+  const pendingHostsList = document.getElementById("pendingHostsList");
+  const supportUsersList = document.getElementById("supportUsersList");
+  const supportUserChat = document.getElementById("supportUserChat");
+  const chatWithUserH4 = document.getElementById("chatWithUser");
+  const adminMessagesDiv = document.getElementById("adminMessages");
+  const adminSupportMessageInput = document.getElementById("adminSupportMessage");
+  const btnAdminSendMsg = document.getElementById("btnAdminSendMsg");
+  const btnCloseChat = document.getElementById("btnCloseChat");
 
-  // Remover bot via backend
-  async function removeBot(botId) {
-    if (!confirm('Tem certeza que deseja remover o bot?')) return;
-    const res = await fetch(`${BACKEND_URL}/bots/${botId}`, { method: 'DELETE' });
-    if (res.ok) alert('Bot removido!');
-    else alert('Erro ao remover bot');
-    loadBots();
-  }
-
-  // Carregar e mostrar bots
-  async function loadBots() {
-    const botsList = document.getElementById('botsList');
-    if (!botsList) return;
-
-    botsList.innerHTML = '<p>Carregando bots...</p>';
-
-    try {
-      const botsData = await getBots(currentUser.id);
-      if (!botsData.bots || botsData.bots.length === 0) {
-        botsList.innerHTML = '<p>Nenhum bot hospedado.</p>';
-        return;
-      }
-
-      botsList.innerHTML = '';
-      botsData.bots.forEach(bot => {
-        const botCard = document.createElement('div');
-        botCard.className = 'bot-card';
-        botCard.innerHTML = `
-          <strong>${bot.name}</strong><br>
-          Status: ${bot.status} | RAM: ${bot.ramUsage || 'N/A'}
-          <div class="bot-actions">
-            <button onclick="startBot('${bot.id}')">Iniciar</button>
-            <button onclick="stopBot('${bot.id}')">Parar</button>
-            <button onclick="removeBot('${bot.id}')">Remover</button>
-          </div>
-        `;
-        botsList.appendChild(botCard);
-      });
-    } catch(e) {
-      botsList.innerHTML = `<p>Erro ao carregar bots: ${e.message}</p>`;
-    }
-  }
-
-  // CHAT SUPORTE - variáveis e funções simples
-
-  let supportMessages = [];
-  let currentUser = null;
-
-  async function loadSupportMessages() {
-    const chatDiv = document.getElementById('supportChat');
-    if (!chatDiv) return;
-
-    try {
-      const res = await fetch(`${BACKEND_URL}/support/${currentUser.id}`);
-      if (!res.ok) throw new Error('Erro ao carregar chat');
-      const data = await res.json();
-      supportMessages = data.messages || [];
-      chatDiv.innerHTML = '';
-      supportMessages.forEach(m => {
-        const div = document.createElement('div');
-        div.textContent = `${m.from}: ${m.message}`;
-        chatDiv.appendChild(div);
-      });
-      chatDiv.scrollTop = chatDiv.scrollHeight;
-    } catch(e) {
-      chatDiv.innerHTML = `<p>Erro no chat: ${e.message}</p>`;
-    }
-  }
-
-  async function sendSupportMessage() {
-    const input = document.getElementById('supportInput');
-    const msg = input.value.trim();
-    if (!msg) return alert('Digite uma mensagem para enviar');
-    try {
-      const res = await fetch(`${BACKEND_URL}/support/${currentUser.id}`, {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ message: msg }),
-      });
-      if (!res.ok) throw new Error('Falha ao enviar mensagem');
-      input.value = '';
-      await loadSupportMessages();
-    } catch(e) {
-      alert(`Erro ao enviar mensagem: ${e.message}`);
-    }
-  }
-
-  // Mostrar painel completo depois do login
-  function showUserPanel(user) {
-    currentUser = user;
-    const content = document.getElementById('content');
-    content.innerHTML = `
-      <div style="display:flex; align-items:center; gap:15px; margin-bottom: 15px;">
-        <img class="avatar" src="https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png" alt="Avatar" onerror="this.onerror=null;this.src='https://cdn.discordapp.com/embed/avatars/0.png'" />
-        <div>
-          <h2>${user.username}#${user.discriminator}</h2>
-          <p>ID: ${user.id}</p>
-          <button id="btnLogout" class="btn">Logout</button>
-        </div>
-      </div>
-      <h3>Seus Bots Hospedados</h3>
-      <div id="botsList"></div>
-      <h3>Chat de Suporte</h3>
-      <div id="supportChat" style="background:#2c2f33; border-radius:6px; max-height:250px; overflow-y:auto; padding:10px; margin-bottom:10px;"></div>
-      <div style="display:flex;">
-        <input id="supportInput" type="text" placeholder="Digite sua mensagem..." />
-        <button id="sendMsgBtn" class="btn">Enviar</button>
-      </div>
-    `;
-
-    document.getElementById('btnLogout').addEventListener('click', () => {
-      window.history.replaceState({}, document.title, REDIRECT_URI);
-      window.location.reload();
-    });
-
-    document.getElementById('sendMsgBtn').addEventListener('click', sendSupportMessage);
-
-    loadBots();
-    loadSupportMessages();
-
-    // Atualizar chat e bots a cada 15 segundos
-    setInterval(loadSupportMessages, 15000);
-    setInterval(loadBots, 15000);
-  }
-
-  async function main() {
+  // Função para pegar parâmetro code da URL
+  function getCodeFromUrl() {
     const params = new URLSearchParams(window.location.search);
-    const code = params.get('code');
+    return params.get("code");
+  }
 
+  // Limpar query string (code)
+  function clearUrlCode() {
+    if (window.history.replaceState) {
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }
+
+  // Fazer login via OAuth2
+  async function doLogin() {
+    const code = getCodeFromUrl();
     if (!code) {
-      redirectToDiscord();
+      // Redirecionar para Discord OAuth2
+      const discordOauthUrl = `https://discord.com/api/oauth2/authorize?client_id=${encodeURIComponent(
+        "${DISCORD_CLIENT_ID}"
+      )}&redirect_uri=${encodeURIComponent(
+        window.location.origin
+      )}&response_type=code&scope=identify%20guilds`;
+      window.location.href = discordOauthUrl;
       return;
     }
 
-    const content = document.getElementById('content');
-    content.innerHTML = '<p>Carregando dados do usuário...</p>';
-
     try {
-      const user = await getUserInfo(code);
-      showUserPanel(user);
-      window.history.replaceState({}, document.title, REDIRECT_URI);
-    } catch (err) {
-      content.innerHTML = `<p>❌ Erro: ${err.message}</p>`;
+      const res = await fetch(`${BACKEND_URL}/auth`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code }),
+      });
+      if (!res.ok) throw new Error("Falha ao autenticar");
+      userData = await res.json();
+      clearUrlCode();
+      renderPanel();
+    } catch (e) {
+      alert("Erro ao fazer login: " + e.message);
     }
   }
 
-  main();
-</script>
-</body>
-</html>
+  btnLogin.addEventListener("click", () => {
+    // Montar URL OAuth2 Discord
+    const discordOauthUrl = `https://discord.com/api/oauth2/authorize?client_id=${encodeURIComponent(
+      "${DISCORD_CLIENT_ID}"
+    )}&redirect_uri=${encodeURIComponent(
+      window.location.origin
+    )}&response_type=code&scope=identify%20guilds`;
+    window.location.href = discordOauthUrl;
+  });
+
+  btnLogout.addEventListener("click", () => {
+    userData = null;
+    loginScreen.style.display = "flex";
+    mainPanel.style.display = "none";
+    btnLogout.style.display = "none";
+  });
+
+  function renderPanel() {
+    if (!userData) return;
+
+    loginScreen.style.display = "none";
+    mainPanel.style.display = "flex";
+    btnLogout.style.display = "inline-block";
+
+    userInfoDiv.innerHTML = `
+      <img src="https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.png" alt="Avatar" onerror="this.onerror=null;this.src='https://cdn.discordapp.com/embed/avatars/0.png';" />
+      <p><strong>${userData.username}#${userData.discriminator}</strong></p>
+      <p>ID: ${userData.id}</p>
+      <p>Admin: ${userData.isAdmin ? "Sim" : "Não"}</p>
+    `;
+
+    loadUserBot();
+    setupSupport();
+    if (userData.isAdmin) {
+      loadAdminPanel();
+    } else {
+      adminPanel.style.display = "none";
+    }
+  }
+
+  async function loadUserBot() {
+    botSection.innerHTML = "<p>Carregando bot...</p>";
+    paymentSection.innerHTML = "";
+    uploadSection.style.display = "none";
+    supportSection.style.display = "none";
+
+    try {
+      const res = await fetch(`${BACKEND_URL}/bots/${userData.id}`);
+      const data = await res.json();
+
+      if (data.bots.length === 0) {
+        botSection.innerHTML = `<p>Você não tem nenhum bot hospedado.</p>`;
+        // Mostrar pagamento
+        if (!userData.paymentDone) {
+          paymentSection.innerHTML = `
+            <p>Para hospedar 1 bot, faça o pagamento via PIX:</p>
+            <div id="pixInfo">
+              <p><strong>Chave PIX:</strong> willianwca2011@gmail.com</p>
+              <p><em>Após o pagamento, envie uma mensagem no chat para solicitar aprovação.</em></p>
+            </div>
+          `;
+        } else {
+          paymentSection.innerHTML = `<p>Pagamento confirmado. Você pode solicitar hospedagem.</p>
+          <button id="btnRequestHost" class="btn">Solicitar Hospedagem</button>`;
+          document
+            .getElementById("btnRequestHost")
+            .addEventListener("click", requestHosting);
+        }
+      } else {
+        const bot = data.bots[0];
+        userData.paymentDone = true; // para facilitar
+
+        botSection.innerHTML = `
+          <p><strong>Bot:</strong> ${bot.name} (${bot.status})</p>
+          <button id="btnStartBot" class="btn" ${
+            bot.status === "online" ? "disabled" : ""
+          }>Iniciar Bot</button>
+          <button id="btnStopBot" class="btn" ${
+            bot.status === "offline" ? "disabled" : ""
+          }>Parar Bot</button>
+          <button id="btnRemoveBot" class="btn" style="background:#f04747;">Remover Bot</button>
+        `;
+        btnStartBot = document.getElementById("btnStartBot");
+        btnStopBot = document.getElementById("btnStopBot");
+        btnRemoveBot = document.getElementById("btnRemoveBot");
+
+        btnStartBot.onclick = () => startBot(bot.id);
+        btnStopBot.onclick = () => stopBot(bot.id);
+        btnRemoveBot.onclick = () => removeBot(bot.id);
+
+        uploadSection.style.display = "none";
+        supportSection.style.display = "block";
+      }
+    } catch (e) {
+      botSection.innerHTML = `<p>Erro ao carregar bot: ${e.message}</p>`;
+    }
+  }
+
+  async function requestHosting() {
+    try {
+      const res = await fetch(`${BACKEND_URL}/bots/${userData.id}/request-host`, {
+        method: "POST",
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || "Erro ao solicitar hospedagem");
+      alert(json.message);
+      loadUserBot();
+    } catch (e) {
+      alert("Erro: " + e.message);
+    }
+  }
+
+  botZipFile.onchange = () => {
+    btnUpload.disabled = !botZipFile.files.length;
+  };
+
+  btnUpload.onclick = async () => {
+    if (!botZipFile.files.length) return;
+    btnUpload.disabled = true;
+    uploadMessage.style.display = "none";
+
+    const formData = new FormData();
+    formData.append("botzip", botZipFile.files[0]);
+
+    try {
+      const res = await fetch(`${BACKEND_URL}/bots/${userData.id}/upload`, {
+        method: "POST",
+        body: formData,
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || "Erro no upload");
+      uploadMessage.style.display = "block";
+      uploadMessage.style.background = "#43b581";
+      uploadMessage.textContent = json.message || "Upload enviado com sucesso!";
+      // Recarregar bot
+      loadUserBot();
+    } catch (e) {
+      uploadMessage.style.display = "block";
+      uploadMessage.style.background = "#f04747";
+      uploadMessage.textContent = "Erro: " + e.message;
+    }
+    btnUpload.disabled = false;
+    botZipFile.value = "";
+  };
+
+  async function startBot(botId) {
+    try {
+      const res = await fetch(`${BACKEND_URL}/bots/${botId}/start`, { method: "POST" });
+      if (!res.ok) throw new Error("Falha ao iniciar bot");
+      alert("Bot iniciado!");
+      loadUserBot();
+    } catch (e) {
+      alert("Erro: " + e.message);
+    }
+  }
+  async function stopBot(botId) {
+    try {
+      const res = await fetch(`${BACKEND_URL}/bots/${botId}/stop`, { method: "POST" });
+      if (!res.ok) throw new Error("Falha ao parar bot");
+      alert("Bot parado!");
+      loadUserBot();
+    } catch (e) {
+      alert("Erro: " + e.message);
+    }
+  }
+  async function removeBot(botId) {
+    if (!confirm("Tem certeza que deseja remover o bot?")) return;
+    try {
+      const res = await fetch(`${BACKEND_URL}/bots/${botId}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Falha ao remover bot");
+      alert("Bot removido!");
+      loadUserBot();
+    } catch (e) {
+      alert("Erro: " + e.message);
+    }
+  }
+
+  // Suporte cliente
+  async function loadSupportMessages() {
+    try {
+      const res = await fetch(`${BACKEND_URL}/support/${userData.id}`);
+      const json = await res.json();
+      messagesDiv.innerHTML = "";
+      for (const msg of json.messages) {
+        const div = document.createElement("div");
+        div.classList.add("msg", msg.from === "User" ? "user" : "admin");
+        const time = new Date(msg.timestamp);
+        div.textContent = `[${time.toLocaleString()}] ${msg.from}: ${msg.message}`;
+        messagesDiv.appendChild(div);
+      }
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    } catch {
+      messagesDiv.innerHTML = "<p>Erro ao carregar mensagens</p>";
+    }
+  }
+  btnSendMsg.onclick = async () => {
+    const text = supportMessageInput.value.trim();
+    if (!text) return alert("Digite uma mensagem");
+    try {
+      const res = await fetch(`${BACKEND_URL}/support/${userData.id}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: text }),
+      });
+      if (!res.ok) throw new Error("Erro ao enviar mensagem");
+      supportMessageInput.value = "";
+      loadSupportMessages();
+    } catch (e) {
+      alert("Erro: " + e.message);
+    }
+  };
+
+  function setupSupport() {
+    supportSection.style.display = "block";
+    loadSupportMessages();
+    setInterval(loadSupportMessages, 10000);
+  }
+
+  // Admin
+
+  async function loadAdminPanel() {
+    adminPanel.style.display = "block";
+    await loadPendingPayments();
+    await loadPendingHosts();
+    await loadSupportUsers();
+  }
+
+  async function loadPendingPayments() {
+    try {
+      const res = await fetch(`${BACKEND_URL}/admin/pending-payments`, {
+        headers: { "x-admin-id": userData.id },
+      });
+      if (!res.ok) throw new Error("Erro ao carregar pagamentos");
+      const data = await res.json();
+      pendingPaymentsList.innerHTML = "";
+      if (data.length === 0) pendingPaymentsList.innerHTML = "<li>Nenhum pagamento pendente</li>";
+      for (const p of data) {
+        const li = document.createElement("li");
+        li.textContent = `Usuário: ${p.userId}`;
+        const btn = document.createElement("button");
+        btn.textContent = "Confirmar Pagamento";
+        btn.className = "btn";
+        btn.onclick = () => confirmPayment(p.userId);
+        li.appendChild(btn);
+        pendingPaymentsList.appendChild(li);
+      }
+    } catch {
+      pendingPaymentsList.innerHTML = "<li>Erro ao carregar</li>";
+    }
+  }
+
+  async function confirmPayment(userId) {
+    try {
+      const res = await fetch(`${BACKEND_URL}/admin/confirm-payment/${userId}`, {
+        method: "POST",
+        headers: { "x-admin-id": userData.id },
+      });
+      if (!res.ok) throw new Error("Erro ao confirmar pagamento");
+      alert("Pagamento confirmado");
+      await loadPendingPayments();
+      await loadPendingHosts();
+    } catch (e) {
+      alert(e.message);
+    }
+  }
+
+  async function loadPendingHosts() {
+    try {
+      const res = await fetch(`${BACKEND_URL}/admin/pending-hosts`, {
+        headers: { "x-admin-id": userData.id },
+      });
+      if (!res.ok) throw new Error("Erro ao carregar pedidos de hospedagem");
+      const data = await res.json();
+      pendingHostsList.innerHTML = "";
+      if (data.length === 0) pendingHostsList.innerHTML = "<li>Nenhum pedido pendente</li>";
+      for (const h of data) {
+        const li = document.createElement("li");
+        li.textContent = `Usuário: ${h.userId}`;
+        const btn = document.createElement("button");
+        btn.textContent = "Aprovar Hospedagem";
+        btn.className = "btn";
+        btn.onclick = () => approveHosting(h.userId);
+        li.appendChild(btn);
+        pendingHostsList.appendChild(li);
+      }
+    } catch {
+      pendingHostsList.innerHTML = "<li>Erro ao carregar</li>";
+    }
+  }
+
+  async function approveHosting(userId) {
+    try {
+      const res = await fetch(`${BACKEND_URL}/admin/approve-host/${userId}`, {
+        method: "POST",
+        headers: { "x-admin-id": userData.id },
+      });
+      if (!res.ok) throw new Error("Erro ao aprovar hospedagem");
+      alert("Hospedagem aprovada");
+      await loadPendingHosts();
+      await loadPendingPayments();
+      await loadUserBot();
+    } catch (e) {
+      alert(e.message);
+    }
+  }
+
+  async function loadSupportUsers() {
+    try {
+      const res = await fetch(`${BACKEND_URL}/admin/support-users
