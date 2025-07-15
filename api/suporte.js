@@ -1,37 +1,15 @@
-export default async function handler(req, res) {
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Método não permitido" });
+let chamados = [];
+
+export default function handler(req, res) {
+  if (req.method === "POST") {
+    const { user, mensagem } = req.body;
+    chamados.push({ user, mensagem, quando: new Date() });
+    return res.status(200).json({ ok: true, msg: "Chamado registrado" });
   }
 
-  const { plano, msg } = req.body;
-
-  if (!plano || !msg) {
-    return res.status(400).json({ error: "Parâmetros insuficientes" });
+  if (req.method === "GET") {
+    return res.status(200).json(chamados);
   }
 
-  try {
-    const response = await fetch(process.env.SUPPORT_WEBHOOK_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        embeds: [
-          {
-            title: `📩 Novo pedido de plano: ${plano}`,
-            description: msg,
-            color: 0x3498db,
-            timestamp: new Date().toISOString(),
-          },
-        ],
-      }),
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      return res.status(500).json({ error: "Erro ao enviar mensagem ao suporte", details: errorText });
-    }
-
-    return res.status(200).json({ ok: true });
-  } catch (err) {
-    return res.status(500).json({ error: "Erro interno do servidor", details: err.message });
-  }
+  res.status(405).json({ error: "Método não permitido" });
 }
