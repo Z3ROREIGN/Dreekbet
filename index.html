@@ -11,6 +11,10 @@ async function checkLogin() {
   const code = params.get("code");
   if (code) {
     const res = await fetch(`/api/exchange?code=${code}`);
+    if (!res.ok) {
+      document.getElementById("content").innerHTML = "<p class='text-red-500'>Erro ao fazer login.</p>";
+      return;
+    }
     const user = await res.json();
     renderUser(user);
     window.history.replaceState({}, document.title, "/");
@@ -26,12 +30,13 @@ async function checkLogin() {
 }
 
 function renderUser(user) {
+  document.getElementById("login").classList.add("hidden");
   document.getElementById("content").innerHTML = `
     <div class="text-center">
       <img class="mx-auto rounded-full shadow-lg" src="https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png" width="128" />
       <h2 class="text-xl mt-4">${user.username}#${user.discriminator}</h2>
       <p>ID: ${user.id}</p>
-      <p>Cargos: ${user.roles.join(", ") || "Nenhum"}</p>
+      <p>Cargos: ${user.roles.length ? user.roles.join(", ") : "Nenhum"}</p>
       <div class="mt-6">
         <h3 class="text-lg font-bold">Planos disponíveis</h3>
         <div class="grid grid-cols-1 gap-4 mt-4">
@@ -63,8 +68,7 @@ function suporte(plano) {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ plano, msg })
-  });
-  alert("Mensagem enviada ao suporte!");
+  }).then(() => alert("Mensagem enviada ao suporte!"));
 }
 
 async function abrirPainel() {
@@ -84,7 +88,6 @@ async function abrirPainel() {
     <ul>${data.pedidos.map(p => `<li>${p.usuario}: ${p.plano} - ${p.mensagem}</li>`).join("")}</ul>
   `;
 }
-
 </script>
 </head>
 <body class="bg-gray-900 text-white flex justify-center items-center min-h-screen">
