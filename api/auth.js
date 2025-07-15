@@ -1,65 +1,31 @@
+import fetch from "node-fetch";
+
 export default async function handler(req, res) {
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Método não permitido" });
-  }
-
-  const { code } = req.body;
-
-  if (!code) {
-    return res.status(400).json({ error: "Código OAuth2 não enviado" });
-  }
+  const code = req.query.code;
+  if (!code) return res.status(400).json({ error: "Código não informado" });
 
   const params = new URLSearchParams();
   params.append("client_id", process.env.DISCORD_CLIENT_ID);
   params.append("client_secret", process.env.DISCORD_CLIENT_SECRET);
   params.append("grant_type", "authorization_code");
-  params.append("code", code);
   params.append("redirect_uri", process.env.DISCORD_REDIRECT_URI);
-  params.append("scope", "identify guilds guilds.join");
+  params.append("code", code);
 
-  try {
-    // Trocar o code pelo token
-    const tokenResponse = await fetch("https://discord.com/api/oauth2/token", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded"
-      },
-      body: params.toString()
-    });
+  const response = await fetch("https://discord.com/api/oauth2/token", {
+    method: "POST",
+    body: params,
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+  });
 
-    if (!tokenResponse.ok) {
-      const errorData = await tokenResponse.text();
-      return res.status(400).json({ error: "Falha ao trocar código por token", details: errorData });
-    }
+  const data = await response.json();
 
-    const tokenData = await tokenResponse.json();
-
-    // Agora buscar dados do usuário
-    const userResponse = await fetch("https://discord.com/api/users/@me", {
-      headers: {
-        Authorization: `${tokenData.token_type} ${tokenData.access_token}`
-      }
-    });
-
-    if (!userResponse.ok) {
-      const errorData = await userResponse.text();
-      return res.status(400).json({ error: "Falha ao obter dados do usuário", details: errorData });
-    }
-
-    const user = await userResponse.json();
-
-    // Se quiser, também buscar guilds para validar cargos/admin, etc
-    const guildsResponse = await fetch("https://discord.com/api/users/@me/guilds", {
-      headers: {
-        Authorization: `${tokenData.token_type} ${tokenData.access_token}`
-      }
-    });
-
-    const guilds = guildsResponse.ok ? await guildsResponse.json() : [];
-
-    // Retornar dados para o frontend
-    return res.status(200).json({ user, guilds, tokenData });
-  } catch (err) {
-    return res.status(500).json({ error: "Erro interno no servidor", details: err.message });
+  if (!data.access_token) {
+    return res.status(400).json({ error: "Falha ao trocar código por token", detalhes: data });
   }
+
+  const userInfo = await fetch("https://discord.com/api/users/@me", {
+    headers: { Authorization: `Bearer ${data.access_token}` },
+  }).then(r => r.json());
+
+  res.redirect(`/dashboard.html?user=${encodeURIComponent(JSON.stringify(userInfo))}`);
 }
