@@ -76,7 +76,7 @@
 </div>
 
 <script>
-  const BACKEND_URL = 'https://dreekbet-production-4f05.up.railway.app';
+  const BACKEND_URL = window.location.origin;
 
   function redirectToDiscord() {
     window.location.href = `${BACKEND_URL}/login`;
@@ -97,20 +97,30 @@
   function showUserPanel(user) {
     const content = document.getElementById('content');
     content.innerHTML = `
-      <img class="avatar" src="https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png" alt="Avatar" width="128" height="128" onerror="this.onerror=null;this.src='https://cdn.discordapp.com/embed/avatars/0.png'"/>
-      <h2>${user.username}#${user.discriminator}</h2>
-      <p>ID: ${user.id}</p>
-      <button id="btnApostar" class="btn" disabled>🎲 Apostar</button>
+      <img class="avatar" src="https://cdn.discordapp.com/avatars/${user.user.id}/${user.user.avatar}.png" alt="Avatar" width="128" height="128" onerror="this.onerror=null;this.src='https://cdn.discordapp.com/embed/avatars/0.png'"/>
+      <h2>${user.user.username}#${user.user.discriminator}</h2>
+      <p>ID: ${user.user.id}</p>
+      <button id="btnVerBots" class="btn">📋 Ver Bots</button>
       <div id="msg" class="message"></div>
     `;
 
-    const btn = document.getElementById('btnApostar');
+    const btn = document.getElementById('btnVerBots');
     const msg = document.getElementById('msg');
 
-    btn.addEventListener('click', () => {
-      btn.disabled = true;
+    btn.addEventListener('click', async () => {
       msg.style.display = 'block';
-      msg.textContent = '🎲 Apostas indisponíveis no momento. Tente mais tarde!';
+      msg.textContent = 'Carregando bots...';
+
+      const res = await fetch(`${BACKEND_URL}/bots/${user.user.id}`);
+      const data = await res.json();
+
+      if (!data.bots || data.bots.length === 0) {
+        msg.textContent = '❌ Nenhum bot hospedado ainda.';
+        return;
+      }
+
+      msg.innerHTML = `<strong>Bots:</strong><br>` +
+        data.bots.map(bot => `${bot.name} — ${bot.status} — ${bot.ramUsage}`).join('<br>');
     });
   }
 
