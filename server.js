@@ -1,82 +1,168 @@
-import express from 'express';
-import fetch from 'node-fetch';
-import dotenv from 'dotenv';
-import cors from 'cors';
-
-dotenv.config();
+import express from "express";
+import cors from "cors";
+import bodyParser from "body-parser";
+import fetch from "node-fetch";
 
 const app = express();
-app.use(cors());
-app.use(express.json());
-
-const { CLIENT_ID, CLIENT_SECRET, REDIRECT_URI, BOT_TOKEN, GUILD_ID } = process.env;
 const PORT = process.env.PORT || 3000;
 
-app.get('/login', (req, res) => {
-  const scope = 'identify guilds.join';
-  const url = `https://discord.com/api/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=code&scope=${scope}`;
-  res.redirect(url);
+app.use(cors());
+app.use(bodyParser.json());
+app.use(express.static("public"));
+
+const CLIENT_ID = process.env.DISCORD_CLIENT_ID;
+const CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET;
+const REDIRECT_URI = process.env.DISCORD_REDIRECT_URI;
+const BOT_TOKEN = process.env.DISCORD_BOT_TOKEN;
+const ADMIN_ROLE_ID = process.env.DISCORD_ADMIN_ROLE_ID;
+
+const users = {};
+const admins = new Set();
+
+async function isAdmin(userId) {
+  try {
+    const res = await fetch(
+      `https://discord.com/api/guilds/YOUR_GUILD_ID_HERE/members/${userId}`,
+      { headers: { Authorization: `Bot ${BOT_TOKEN}` } }
+    );
+    if (!res.ok) return false;
+    const member = await res.json();
+    return member.roles.includes(ADMIN_ROLE_ID);
+  } catch {
+    return false;
+  }
+}
+
+app.post("/auth", async (req, res) => {
+  const { code } = req.body;
+  if (!code) return res.status(400).json({ error: "Code é obrigatório" });
+
+  const params = new URLSearchParams();
+  params.append("client_id", CLIENT_ID);
+  params.append("client_secret", CLIENT_SECRET);
+  params.append("grant_type", "authorization_code");
+  params.append("code", code);
+  params.append("redirect_uri", REDIRECT_URI);
+
+  try {
+    const tokenRes = await fetch("https://discord.com/api/oauth2/token", {
+      method: "POST",
+      body: params,
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    });
+    const tokenData = await tokenRes.json();
+    if (!tokenData.access_token)
+      return res.status(400).json({ error: "Falha no token" });
+
+    const userRes = await fetch("https://discord.com/api/users/@me", {
+      headers: { Authorization: `Bearer ${tokenData.access_token}` },
+    });
+    const userData = await userRes.json();
+
+    const adminCheck = await isAdmin(userData.id);
+    if (adminCheck) admins.add(userData.id);
+
+    if (!users[userData.id]) {
+      users[userData.id] = {
+        paidSlots: 0,
+        bots: [],
+        accessGranted: false,
+        messages: [],
+      };
+    }
+
+    res.json({
+      user: userData,
+      isAdmin: adminCheck,
+      paidSlots: users[userData.id].paidSlots,
+      accessGranted: users[userData.id].accessGranted,
+    });
+  } catch (err) {
+    res.status(500).json({ error: "Erro no servidor" });
+  }
 });
 
-app.post('/auth', async (req, res) => {
-  try {
-    const { code } = req.body;
-    if (!code) return res.status(400).json({ error: 'Code não fornecido' });
+app.get("/bots/:userId", (req, res) => {
+  const { userId } = req.params;
+  const user = users[userId];
+  if (!user) return res.status(404).json({ error: "Usuário não encontrado" });
 
-    const params = new URLSearchParams({
-      client_id: CLIENT_ID,
-      client_secret: CLIENT_SECRET,
-      grant_type: 'authorization_code',
-      code,
-      redirect_uri: REDIRECT_URI,
-      scope: 'identify guilds.join'
-    });
+  res.json({ bots: user.bots });
+});
 
-    const tokenRes = await fetch('https://discord.com/api/oauth2/token', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: params
-    });
+app.post("/admin/grant", (req, res) => {
+  const { adminId, targetUserId } = req.body;
+  if (!admins.has(adminId))
+    return res.status(403).json({ error: "Não autorizado" });
 
-    if (!tokenRes.ok) {
-      const text = await tokenRes.text();
-      return res.status(500).json({ error: `Erro ao trocar código por token: ${text}` });
-    }
+  if (!users[targetUserId])
+    return res.status(404).json({ error: "Usuário alvo não encontrado" });
 
-    const tokenJson = await tokenRes.json();
+  users[targetUserId].accessGranted = true;
+  users[targetUserId].paidSlots = 1;
 
-    const userRes = await fetch('https://discord.com/api/users/@me', {
-      headers: { Authorization: `Bearer ${tokenJson.access_token}` }
-    });
+  res.json({ message: "Acesso liberado para usuário", targetUserId });
+});
 
-    if (!userRes.ok) {
-      const text = await userRes.text();
-      return res.status(500).json({ error: `Erro ao obter dados do usuário: ${text}` });
-    }
-
-    const user = await userRes.json();
-
-    // Adicionar usuário no servidor
-    const addRes = await fetch(`https://discord.com/api/guilds/${GUILD_ID}/members/${user.id}`, {
-      method: 'PUT',
-      headers: {
-        Authorization: `Bot ${BOT_TOKEN}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ access_token: tokenJson.access_token })
-    });
-
-    if (!addRes.ok) {
-      const text = await addRes.text();
-      return res.status(500).json({ error: `Erro ao adicionar usuário no servidor: ${text}` });
-    }
-
-    res.json(user);
-
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: error.message });
+app.post("/bot/upload", (req, res) => {
+  const { userId, botName } = req.body;
+  const user = users[userId];
+  if (!user) return res.status(404).json({ error: "Usuário não encontrado" });
+  if (!user.accessGranted || user.bots.length >= user.paidSlots) {
+    return res
+      .status(403)
+      .json({ error: "Acesso não liberado ou limite de bots atingido" });
   }
+
+  const newBot = {
+    id: `bot_${Date.now()}`,
+    name: botName,
+    status: "offline",
+    ramUsage: "0MB",
+  };
+
+  user.bots.push(newBot);
+  res.json({ message: "Bot hospedado com sucesso", bot: newBot });
+});
+
+app.post("/bot/start", (req, res) => {
+  const { userId, botId } = req.body;
+  const user = users[userId];
+  if (!user) return res.status(404).json({ error: "Usuário não encontrado" });
+  const bot = user.bots.find((b) => b.id === botId);
+  if (!bot) return res.status(404).json({ error: "Bot não encontrado" });
+
+  bot.status = "online";
+  bot.ramUsage = "50MB";
+  res.json({ message: "Bot iniciado", bot });
+});
+
+app.post("/bot/stop", (req, res) => {
+  const { userId, botId } = req.body;
+  const user = users[userId];
+  if (!user) return res.status(404).json({ error: "Usuário não encontrado" });
+  const bot = user.bots.find((b) => b.id === botId);
+  if (!bot) return res.status(404).json({ error: "Bot não encontrado" });
+
+  bot.status = "offline";
+  bot.ramUsage = "0MB";
+  res.json({ message: "Bot parado", bot });
+});
+
+app.post("/support/send", (req, res) => {
+  const { userId, message, isAdmin } = req.body;
+  if (!users[userId]) return res.status(404).json({ error: "Usuário não encontrado" });
+
+  const entry = { fromAdmin: !!isAdmin, message, date: new Date().toISOString() };
+  users[userId].messages.push(entry);
+  res.json({ message: "Mensagem enviada" });
+});
+
+app.get("/support/messages/:userId", (req, res) => {
+  const { userId } = req.params;
+  if (!users[userId]) return res.status(404).json({ error: "Usuário não encontrado" });
+
+  res.json({ messages: users[userId].messages || [] });
 });
 
 app.listen(PORT, () => {
