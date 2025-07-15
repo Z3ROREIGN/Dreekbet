@@ -4,21 +4,65 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>DreekBet 🌐</title>
-<script>
-  window.onload = () => {
-    // Se tiver cookie já vai para o painel
-    if (document.cookie.includes("user=")) {
-      window.location.href = "/api/painel";
-    }
-  }
-</script>
 <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gradient-to-br from-gray-800 to-gray-900 text-white min-h-screen flex flex-col justify-center items-center">
-  <header class="text-4xl font-bold mb-8 text-indigo-400">🌐 DreekBet Applications</header>
-  <p class="text-lg text-gray-300 mb-6">✨ Aposte nas suas aplicações com estilo!</p>
-  <a href="/api/auth" class="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-3 rounded-lg text-lg shadow">
-    Login com Discord
-  </a>
+<body class="bg-gray-900 text-white min-h-screen flex flex-col items-center justify-center p-4">
+<header id="header" class="w-full max-w-4xl flex justify-between items-center mb-6"></header>
+
+<main id="content" class="w-full max-w-4xl grid gap-6"></main>
+
+<script>
+async function fetchUser() {
+  const res = await fetch('/api/user');
+  if (!res.ok) return null;
+  return res.json();
+}
+
+function render(user) {
+  const header = document.getElementById('header');
+  const content = document.getElementById('content');
+
+  if (!user) {
+    header.innerHTML = `<h1 class="text-2xl text-indigo-400">🌐 DreekBet Applications</h1>`;
+    content.innerHTML = `
+      <p class="text-lg text-gray-300 mb-6">✨ Aposte nas suas aplicações com estilo!</p>
+      <a href="/api/auth" class="bg-indigo-600 hover:bg-indigo-500 px-6 py-3 rounded text-lg">Login com Discord</a>
+    `;
+    return;
+  }
+
+  header.innerHTML = `
+    <div class="flex gap-4 items-center">
+      <img src="https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png" class="w-10 h-10 rounded-full">
+      <span>${user.username}#${user.discriminator}</span>
+    </div>
+    <a href="/api/painel" class="bg-indigo-600 hover:bg-indigo-500 px-3 py-1 rounded">Painel</a>
+  `;
+
+  const planos = [
+    { nome: "Carbon", preco: 5, vantagens: ["512MB RAM", "1 Bot", "Suporte básico"] },
+    { nome: "Golden", preco: 10, vantagens: ["1GB RAM", "2 Bots", "Suporte prioritário"] },
+    { nome: "Platinum", preco: 15, vantagens: ["2GB RAM", "3 Bots", "Suporte VIP"] },
+  ];
+
+  const planosHTML = planos.map(p => `
+    <div class="bg-gray-800 p-4 rounded shadow">
+      <h3 class="text-xl text-indigo-300">${p.nome}</h3>
+      <p class="text-lg">💸 R$ ${p.preco},00</p>
+      <ul class="text-sm mt-2">
+        ${p.vantagens.map(v => `<li>✅ ${v}</li>`).join("")}
+      </ul>
+      <button class="mt-4 bg-indigo-600 hover:bg-indigo-500 px-3 py-1 rounded">Adquirir</button>
+    </div>
+  `).join("");
+
+  content.innerHTML = `
+    <h2 class="text-xl mb-4">Escolha seu plano:</h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">${planosHTML}</div>
+  `;
+}
+
+fetchUser().then(render);
+</script>
 </body>
 </html>
