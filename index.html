@@ -68,34 +68,6 @@
     font-weight: bold;
     display: none;
   }
-  .bots-list {
-    text-align: left;
-    margin-top: 15px;
-    max-height: 200px;
-    overflow-y: auto;
-    border: 1px solid #7289da;
-    border-radius: 6px;
-    padding: 10px;
-    background: #2c2f33;
-  }
-  .bot-item {
-    margin-bottom: 10px;
-    border-bottom: 1px solid #444;
-    padding-bottom: 5px;
-  }
-  .bot-actions button {
-    margin-right: 5px;
-    padding: 5px 10px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    color: white;
-    background-color: #7289da;
-    transition: background-color 0.3s ease;
-  }
-  .bot-actions button:hover {
-    background-color: #5b6eae;
-  }
 </style>
 </head>
 <body>
@@ -104,10 +76,14 @@
 </div>
 
 <script>
+  const CLIENT_ID = "SEU_CLIENT_ID_DISCORD_AQUI"; // substitua com seu client ID
+  const REDIRECT_URI = window.location.origin; // ex: https://dreekbet.shop
+  const OAUTH2_URL = `https://discord.com/api/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=code&scope=identify`;
+
   const BACKEND_URL = window.location.origin;
 
   function redirectToDiscord() {
-    window.location.href = `${BACKEND_URL}/login`;
+    window.location.href = OAUTH2_URL;
   }
 
   async function getUserInfo(code) {
@@ -116,93 +92,24 @@
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ code })
     });
-
     if (!res.ok) throw new Error('Falha ao obter dados do usuário');
-
     return await res.json();
-  }
-
-  function createBotElement(bot) {
-    const div = document.createElement('div');
-    div.className = 'bot-item';
-    div.innerHTML = `
-      <strong>${bot.name}</strong><br>
-      Status: ${bot.status} | RAM: ${bot.ramUsage || 'N/A'}
-      <div class="bot-actions">
-        <button onclick="startBot('${bot.id}')">Iniciar</button>
-        <button onclick="stopBot('${bot.id}')">Parar</button>
-        <button onclick="removeBot('${bot.id}')">Remover</button>
-      </div>
-    `;
-    return div;
-  }
-
-  async function startBot(botId) {
-    const res = await fetch(`${BACKEND_URL}/bots/${botId}/start`, { method: 'POST' });
-    if (res.ok) alert('Bot iniciado!');
-    else alert('Erro ao iniciar bot');
-    loadBots();
-  }
-
-  async function stopBot(botId) {
-    const res = await fetch(`${BACKEND_URL}/bots/${botId}/stop`, { method: 'POST' });
-    if (res.ok) alert('Bot parado!');
-    else alert('Erro ao parar bot');
-    loadBots();
-  }
-
-  async function removeBot(botId) {
-    if (!confirm('Tem certeza que quer remover o bot?')) return;
-    const res = await fetch(`${BACKEND_URL}/bots/${botId}`, { method: 'DELETE' });
-    if (res.ok) alert('Bot removido!');
-    else alert('Erro ao remover bot');
-    loadBots();
-  }
-
-  async function loadBots(userId) {
-    const msg = document.getElementById('msg');
-    const botsContainer = document.getElementById('botsContainer');
-    if (!botsContainer) return;
-
-    msg.style.display = 'block';
-    msg.textContent = 'Carregando bots...';
-
-    const res = await fetch(`${BACKEND_URL}/bots/${userId}`);
-    if (!res.ok) {
-      msg.textContent = 'Erro ao carregar bots.';
-      return;
-    }
-    const data = await res.json();
-
-    botsContainer.innerHTML = '';
-    if (!data.bots || data.bots.length === 0) {
-      msg.textContent = 'Nenhum bot hospedado ainda.';
-      return;
-    }
-    msg.style.display = 'none';
-
-    data.bots.forEach(bot => {
-      const botElem = createBotElement(bot);
-      botsContainer.appendChild(botElem);
-    });
   }
 
   function showUserPanel(user) {
     const content = document.getElementById('content');
     content.innerHTML = `
-      <img class="avatar" src="https://cdn.discordapp.com/avatars/${user.user.id}/${user.user.avatar}.png" alt="Avatar" width="128" height="128" onerror="this.onerror=null;this.src='https://cdn.discordapp.com/embed/avatars/0.png'"/>
-      <h2>${user.user.username}#${user.user.discriminator}</h2>
-      <p>ID: ${user.user.id}</p>
+      <img class="avatar" src="https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png" alt="Avatar" width="128" height="128" onerror="this.onerror=null;this.src='https://cdn.discordapp.com/embed/avatars/0.png'"/>
+      <h2>${user.username}#${user.discriminator}</h2>
+      <p>ID: ${user.id}</p>
       <button id="btnLogout" class="btn">Logout</button>
       <div id="msg" class="message"></div>
-      <div id="botsContainer" class="bots-list"></div>
     `;
 
-    document.getElementById('btnLogout').onclick = () => {
-      window.location.href = '/logout';
-    };
-
-    loadBots(user.user.id);
+    document.getElementById('btnLogout').addEventListener('click', () => {
+      window.history.replaceState({}, document.title, REDIRECT_URI);
+      window.location.reload();
+    });
   }
 
   async function main() {
@@ -220,7 +127,7 @@
     try {
       const user = await getUserInfo(code);
       showUserPanel(user);
-      window.history.replaceState({}, document.title, window.location.pathname);
+      window.history.replaceState({}, document.title, REDIRECT_URI);
     } catch (err) {
       content.innerHTML = `<p>❌ Erro: ${err.message}</p>`;
     }
