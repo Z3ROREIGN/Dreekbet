@@ -46,12 +46,6 @@ export default async function handler(req, res) {
     body: JSON.stringify({ access_token: tokenData.access_token }),
   });
 
-  const memberRes = await fetch(`https://discord.com/api/guilds/${GUILD_ID}/members/${user.id}`, {
-    headers: { Authorization: `Bot ${process.env.DISCORD_BOT_TOKEN}` },
-  });
-  const member = await memberRes.json();
-
-  // salva em cookie para acessar o painel depois
-  res.setHeader("Set-Cookie", `user=${Buffer.from(JSON.stringify({ id: user.id, username: user.username, discriminator: user.discriminator })).toString("base64")}; Path=/; HttpOnly`);
-  return res.redirect("/api/painel");
+  res.setHeader("Set-Cookie", `user=${Buffer.from(JSON.stringify(user)).toString("base64")}; Path=/; HttpOnly`);
+  res.redirect("/api/painel");
 }
