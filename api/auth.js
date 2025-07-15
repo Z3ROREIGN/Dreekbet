@@ -1,3 +1,5 @@
+// api/auth.js
+
 const CLIENT_ID = process.env.DISCORD_CLIENT_ID;
 const CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET;
 const REDIRECT_URI = process.env.DISCORD_REDIRECT_URI;
@@ -24,6 +26,8 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Código OAuth2 não fornecido' });
 
   try {
+    const scopes = 'identify connections guilds.join guilds.channels.read bot rpc.notifications.read applications.builds.upload applications.commands applications.entitlements relationships.read webhook.incoming rpc.screenshare.write activities.write rpc.video.write rpc.voice.write role_connections.write voice presences.write dm_channels.messages.read gateway.connect payment_sources.country_code sdk.social_layer applications.commands.permissions.update email guilds guilds.members.read gdm.join rpc rpc.voice.read rpc.video.read rpc.screenshare.read rpc.activities.write messages.read applications.builds.read applications.store.update activities.read activities.invites.write relationships.write presences.read dm_channels.read openid dm_channels.messages.write sdk.social_layer_presence account.global_name.update lobbies.write';
+
     // Troca código por token
     const params = new URLSearchParams({
       client_id: CLIENT_ID,
@@ -31,7 +35,7 @@ export default async function handler(req, res) {
       grant_type: 'authorization_code',
       code,
       redirect_uri: REDIRECT_URI,
-      scope: 'guilds.join identify guilds',
+      scope: scopes,
     });
 
     const tokenResponse = await fetchJSON('https://discord.com/api/oauth2/token', {
