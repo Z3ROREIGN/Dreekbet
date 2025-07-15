@@ -76,8 +76,9 @@
 </div>
 
 <script>
-  // URL enorme que você gerou para OAuth2:
-  const LOGIN_URL = 'https://discord.com/oauth2/authorize?client_id=1391419432257060914&permissions=8&response_type=code&redirect_uri=https%3A%2F%2Fdreekbet.shop&integration_type=0&scope=identify+connections+guilds.join+guilds.channels.read+bot+rpc.notifications.read+applications.builds.upload+applications.commands+applications.entitlements+relationships.read+webhook.incoming+rpc.screenshare.write+activities.write+rpc.video.write+rpc.voice.write+role_connections.write+voice+presences.write+dm_channels.messages.read+gateway.connect+payment_sources.country_code+sdk.social_layer+applications.commands.permissions.update+email+guilds+guilds.members.read+gdm.join+rpc+rpc.voice.read+rpc.video.read+rpc.screenshare.read+rpc.activities.write+messages.read+applications.builds.read+applications.store.update+activities.read+activities.invites.write+relationships.write+presences.read+dm_channels.read+openid+dm_channels.messages.write+sdk.social_layer_presence+account.global_name.update+lobbies.write';
+  const CLIENT_ID = '1391419432257060914';
+  const REDIRECT_URI = 'https://dreekbet.shop';
+  const LOGIN_URL = `https://discord.com/api/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=code&scope=identify%20guilds%20guilds.join%20email&prompt=consent`;
 
   async function fetchUserData(code) {
     const res = await fetch('/api/auth', {
