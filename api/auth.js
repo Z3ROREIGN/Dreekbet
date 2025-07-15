@@ -1,6 +1,6 @@
 import fetch from "node-fetch";
 
-const GUILD_ID = "SEU_GUILD_ID";
+const GUILD_ID = process.env.SEU_GUILD_ID;
 
 export default async function handler(req, res) {
   const { code } = req.query;
@@ -12,7 +12,7 @@ export default async function handler(req, res) {
       response_type: "code",
       scope: "identify guilds guilds.join",
     });
-    return res.redirect(`https://discord.com/api/oauth2/authorize?${params.toString()}`);
+    return res.redirect(`https://discord.com/api/oauth2/authorize?${params}`);
   }
 
   const tokenRes = await fetch("https://discord.com/api/oauth2/token", {
