@@ -17,7 +17,7 @@ app.use(express.static(__dirname)); // Serve arquivos estáticos da raiz
 
 const CLIENT_ID = process.env.DISCORD_CLIENT_ID;
 const CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET;
-const REDIRECT_URI = process.env.DISCORD_REDIRECT_URI; // ex: https://dreekbet.vercel.app
+const REDIRECT_URI = process.env.DISCORD_REDIRECT_URI; // ex: https://dreekbet.shop
 const BOT_TOKEN = process.env.DISCORD_BOT_TOKEN;
 const ADMIN_ROLE_ID = process.env.DISCORD_ADMIN_ROLE_ID;
 const GUILD_ID = process.env.DISCORD_GUILD_ID; // seu servidor Discord
@@ -33,7 +33,7 @@ app.get("/login", (req, res) => {
 });
 
 app.get("/logout", (req, res) => {
-  // Simples logout — redireciona para a página inicial sem código
+  // Apenas redireciona para a raiz sem código, "desloga"
   res.redirect("/");
 });
 
@@ -100,7 +100,7 @@ app.post("/auth", async (req, res) => {
   }
 });
 
-// Exemplo de rotas para manipular bots (ajuste para integrar com sua API Discloud)
+// Rotas exemplo para manipular bots
 
 app.get("/bots/:userId", (req, res) => {
   const userId = req.params.userId;
@@ -109,17 +109,17 @@ app.get("/bots/:userId", (req, res) => {
 });
 
 app.post("/bots/:botId/start", (req, res) => {
-  // lógica para iniciar bot via sua API Discloud aqui
+  // Aqui você chama a API da Discloud para iniciar o bot
   res.json({ message: "Bot iniciado (simulado)" });
 });
 
 app.post("/bots/:botId/stop", (req, res) => {
-  // lógica para parar bot via sua API Discloud aqui
+  // Aqui você chama a API da Discloud para parar o bot
   res.json({ message: "Bot parado (simulado)" });
 });
 
 app.delete("/bots/:botId", (req, res) => {
-  // lógica para remover bot via sua API Discloud aqui
+  // Aqui você chama a API da Discloud para remover o bot
   res.json({ message: "Bot removido (simulado)" });
 });
 
