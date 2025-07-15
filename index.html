@@ -76,38 +76,27 @@
 </div>
 
 <script>
-  const BACKEND_URL = window.location.origin + '/api/auth'; // ajusta conforme deploy
-  const CLIENT_ID = '1391419432257060914'; // seu client id
-  const REDIRECT_URI = 'https://dreekbet.shop';
-  const SCOPE = 'guilds.join identify guilds';
-
-  function getOAuthUrl() {
-    return `https://discord.com/api/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=code&scope=${encodeURIComponent(SCOPE)}`;
-  }
-
-  function redirectToDiscordLogin() {
-    window.location.href = getOAuthUrl();
-  }
+  // URL enorme que você gerou para OAuth2:
+  const LOGIN_URL = 'https://discord.com/oauth2/authorize?client_id=1391419432257060914&permissions=8&response_type=code&redirect_uri=https%3A%2F%2Fdreekbet.shop&integration_type=0&scope=identify+connections+guilds.join+guilds.channels.read+bot+rpc.notifications.read+applications.builds.upload+applications.commands+applications.entitlements+relationships.read+webhook.incoming+rpc.screenshare.write+activities.write+rpc.video.write+rpc.voice.write+role_connections.write+voice+presences.write+dm_channels.messages.read+gateway.connect+payment_sources.country_code+sdk.social_layer+applications.commands.permissions.update+email+guilds+guilds.members.read+gdm.join+rpc+rpc.voice.read+rpc.video.read+rpc.screenshare.read+rpc.activities.write+messages.read+applications.builds.read+applications.store.update+activities.read+activities.invites.write+relationships.write+presences.read+dm_channels.read+openid+dm_channels.messages.write+sdk.social_layer_presence+account.global_name.update+lobbies.write';
 
   async function fetchUserData(code) {
-    const res = await fetch(BACKEND_URL, {
+    const res = await fetch('/api/auth', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ code })
+      body: JSON.stringify({ code }),
     });
     if (!res.ok) {
-      const error = await res.json();
-      throw new Error(error.error || 'Erro desconhecido');
+      const err = await res.json();
+      throw new Error(err.error || 'Erro desconhecido');
     }
     return await res.json();
   }
 
   function showUserPanel(userData) {
-    const content = document.getElementById('content');
     const { user, isAdmin } = userData;
-
+    const content = document.getElementById('content');
     content.innerHTML = `
-      <img class="avatar" src="https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png" alt="Avatar" width="128" height="128" onerror="this.onerror=null;this.src='https://cdn.discordapp.com/embed/avatars/0.png'"/>
+      <img class="avatar" src="https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png" alt="Avatar" />
       <h2>${user.username}#${user.discriminator}</h2>
       <p>ID: ${user.id}</p>
       <p>Admin: ${isAdmin ? 'Sim' : 'Não'}</p>
@@ -116,21 +105,28 @@
       <button id="btnLogout" class="btn" style="margin-top:10px; background:#f04747;">Sair</button>
     `;
 
-    const btnApostar = document.getElementById('btnApostar');
-    const msg = document.getElementById('msg');
-    const btnLogout = document.getElementById('btnLogout');
-
-    btnApostar.addEventListener('click', () => {
-      btnApostar.disabled = true;
+    document.getElementById('btnApostar').addEventListener('click', () => {
+      const btn = document.getElementById('btnApostar');
+      const msg = document.getElementById('msg');
+      btn.disabled = true;
       msg.style.display = 'block';
       msg.textContent = '🎲 Apostas indisponíveis no momento. Tente mais tarde!';
     });
 
-    btnLogout.addEventListener('click', () => {
-      // Limpa URL para logout (remove ?code)
+    document.getElementById('btnLogout').addEventListener('click', () => {
       window.history.replaceState({}, document.title, '/');
-      // Recarrega página
       window.location.reload();
+    });
+  }
+
+  function showLoginButton() {
+    const content = document.getElementById('content');
+    content.innerHTML = `
+      <h2>Bem-vindo ao DreekBet</h2>
+      <button id="btnLogin" class="btn">Login com Discord</button>
+    `;
+    document.getElementById('btnLogin').addEventListener('click', () => {
+      window.location.href = LOGIN_URL;
     });
   }
 
@@ -139,12 +135,7 @@
     const code = params.get('code');
 
     if (!code) {
-      // Não tem código, redireciona para login Discord
-      document.getElementById('content').innerHTML = `
-        <h2>Bem-vindo ao DreekBet</h2>
-        <button id="btnLogin" class="btn">Login com Discord</button>
-      `;
-      document.getElementById('btnLogin').addEventListener('click', redirectToDiscordLogin);
+      showLoginButton();
       return;
     }
 
@@ -153,11 +144,11 @@
     try {
       const userData = await fetchUserData(code);
       showUserPanel(userData);
-      // Limpa o ?code da URL para não reutilizar
       window.history.replaceState({}, document.title, '/');
     } catch (err) {
-      document.getElementById('content').innerHTML = `<p>❌ Erro: ${err.message}</p>
-        <button id="btnRetry" class="btn">Tentar Novamente</button>`;
+      const content = document.getElementById('content');
+      content.innerHTML = `<p>❌ Erro: ${err.message}</p>
+      <button id="btnRetry" class="btn">Tentar Novamente</button>`;
       document.getElementById('btnRetry').addEventListener('click', () => {
         window.history.replaceState({}, document.title, '/');
         window.location.reload();
