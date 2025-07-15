@@ -47,5 +47,5 @@ export default async function handler(req, res) {
   });
 
   res.setHeader("Set-Cookie", `user=${Buffer.from(JSON.stringify(user)).toString("base64")}; Path=/; HttpOnly`);
-  res.redirect("/api/painel");
+  res.redirect("/");
 }
