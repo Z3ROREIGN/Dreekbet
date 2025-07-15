@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>DreekBet Applications 🌐</title>
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+<script>
+async function checkLogin() {
+  const params = new URLSearchParams(window.location.search);
+  const code = params.get("code");
+  if (code) {
+    const res = await fetch(`/api/exchange?code=${code}`);
+    const user = await res.json();
+    renderUser(user);
+    window.history.replaceState({}, document.title, "/");
+  } else {
+    const res = await fetch(`/api/user`);
+    if (res.ok) {
+      const user = await res.json();
+      renderUser(user);
+    } else {
+      document.getElementById("login").classList.remove("hidden");
+    }
+  }
+}
+
+function renderUser(user) {
+  document.getElementById("content").innerHTML = `
+    <div class="text-center">
+      <img class="mx-auto rounded-full shadow-lg" src="https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png" width="128" />
+      <h2 class="text-xl mt-4">${user.username}#${user.discriminator}</h2>
+      <p>ID: ${user.id}</p>
+      <p>Cargos: ${user.roles.join(", ") || "Nenhum"}</p>
+      <div class="mt-6">
+        <h3 class="text-lg font-bold">Planos disponíveis</h3>
+        <div class="grid grid-cols-1 gap-4 mt-4">
+          ${renderPlans()}
+        </div>
+      </div>
+      ${user.isAdmin ? `<div class="mt-8"><button onclick="abrirPainel()" class="px-4 py-2 bg-red-500 text-white rounded">Painel Admin</button></div>` : ""}
+    </div>`;
+}
+
+function renderPlans() {
+  const planos = [
+    { nome: "Carbon", preco: 5, vantagens: "Hospedagem básica para 1 bot" },
+    { nome: "Golden", preco: 10, vantagens: "Hospedagem + suporte premium" },
+    { nome: "Platinum", preco: 15, vantagens: "Hospedagem + suporte + prioridade + recursos extras" }
+  ];
+  return planos.map(p => `
+    <div class="p-4 bg-gray-800 rounded shadow">
+      <h4 class="text-lg font-bold">${p.nome} - R$${p.preco}</h4>
+      <p>${p.vantagens}</p>
+      <button onclick="suporte('${p.nome}')" class="mt-2 px-3 py-1 bg-green-600 rounded">Adquirir</button>
+    </div>`).join("");
+}
+
+function suporte(plano) {
+  const msg = prompt(`Explique sua escolha do plano ${plano}:`);
+  if (!msg) return;
+  fetch("/api/suporte", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ plano, msg })
+  });
+  alert("Mensagem enviada ao suporte!");
+}
+
+async function abrirPainel() {
+  const res = await fetch("/api/painel");
+  if (!res.ok) {
+    alert("Você não tem permissão.");
+    return;
+  }
+  const data = await res.json();
+  document.getElementById("content").innerHTML = `
+    <h2 class="text-xl text-center">Painel do Administrador</h2>
+    <p>Total usuários: ${data.totalUsuarios}</p>
+    <p>Total pedidos: ${data.totalPedidos}</p>
+    <h3 class="text-lg mt-4">Usuários</h3>
+    <ul>${data.usuarios.map(u => `<li>${u.username} - ${u.plano} (${u.status})</li>`).join("")}</ul>
+    <h3 class="text-lg mt-4">Pedidos</h3>
+    <ul>${data.pedidos.map(p => `<li>${p.usuario}: ${p.plano} - ${p.mensagem}</li>`).join("")}</ul>
+  `;
+}
+
+</script>
+</head>
+<body class="bg-gray-900 text-white flex justify-center items-center min-h-screen">
+<div>
+  <div id="login" class="hidden">
+    <a href="https://discord.com/oauth2/authorize?client_id=SEU_CLIENT_ID&redirect_uri=https%3A%2F%2Fdreekbet.shop%2F&response_type=code&scope=identify%20guilds%20guilds.join" class="px-4 py-2 bg-indigo-600 rounded">Login com Discord</a>
+  </div>
+  <div id="content"></div>
+</div>
+<script>checkLogin()</script>
+</body>
+</html>
