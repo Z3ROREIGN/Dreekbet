@@ -1,26 +1,21 @@
-import fetch from 'node-fetch';
-
-const GUILD_ID = 'SEU_GUILD_ID';
-const SUPPORT_CHANNEL_ID = 'SEU_SUPORTE_CANAL_ID';
+const fetch = require("node-fetch");
 
 export default async function handler(req, res) {
-  if (req.method !== 'POST') return res.status(405).json({ error: 'Método não permitido' });
+  const { plano, msg } = req.body;
 
-  const { mensagem, usuario } = req.body;
-  if (!mensagem || !usuario) return res.status(400).json({ error: 'Mensagem ou usuário ausente' });
-
-  const { DISCORD_BOT_TOKEN } = process.env;
-
-  await fetch(`https://discord.com/api/channels/${SUPPORT_CHANNEL_ID}/messages`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bot ${DISCORD_BOT_TOKEN}`
-    },
+  await fetch(process.env.SUPPORT_WEBHOOK_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      content: `📩 Nova mensagem de suporte de **${usuario}**:\n> ${mensagem}`
-    })
+      embeds: [
+        {
+          title: `Novo pedido de plano: ${plano}`,
+          description: msg,
+          color: 3066993,
+        },
+      ],
+    }),
   });
 
-  res.json({ ok: true, message: 'Mensagem enviada ao suporte!' });
+  res.json({ ok: true });
 }
