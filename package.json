@@ -1,7 +1,7 @@
 {
   "name": "dreekbet-panel",
   "version": "1.0.0",
-  "description": "Painel de hospedagem de bots Discord",
+  "description": "Painel DreekBet para compras de Bot e de hospedagem",
   "main": "server.js",
   "type": "module",
   "scripts": {
