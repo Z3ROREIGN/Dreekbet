@@ -68,6 +68,34 @@
     font-weight: bold;
     display: none;
   }
+  .bots-list {
+    text-align: left;
+    margin-top: 15px;
+    max-height: 200px;
+    overflow-y: auto;
+    border: 1px solid #7289da;
+    border-radius: 6px;
+    padding: 10px;
+    background: #2c2f33;
+  }
+  .bot-item {
+    margin-bottom: 10px;
+    border-bottom: 1px solid #444;
+    padding-bottom: 5px;
+  }
+  .bot-actions button {
+    margin-right: 5px;
+    padding: 5px 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    color: white;
+    background-color: #7289da;
+    transition: background-color 0.3s ease;
+  }
+  .bot-actions button:hover {
+    background-color: #5b6eae;
+  }
 </style>
 </head>
 <body>
@@ -94,34 +122,87 @@
     return await res.json();
   }
 
+  function createBotElement(bot) {
+    const div = document.createElement('div');
+    div.className = 'bot-item';
+    div.innerHTML = `
+      <strong>${bot.name}</strong><br>
+      Status: ${bot.status} | RAM: ${bot.ramUsage || 'N/A'}
+      <div class="bot-actions">
+        <button onclick="startBot('${bot.id}')">Iniciar</button>
+        <button onclick="stopBot('${bot.id}')">Parar</button>
+        <button onclick="removeBot('${bot.id}')">Remover</button>
+      </div>
+    `;
+    return div;
+  }
+
+  async function startBot(botId) {
+    const res = await fetch(`${BACKEND_URL}/bots/${botId}/start`, { method: 'POST' });
+    if (res.ok) alert('Bot iniciado!');
+    else alert('Erro ao iniciar bot');
+    loadBots();
+  }
+
+  async function stopBot(botId) {
+    const res = await fetch(`${BACKEND_URL}/bots/${botId}/stop`, { method: 'POST' });
+    if (res.ok) alert('Bot parado!');
+    else alert('Erro ao parar bot');
+    loadBots();
+  }
+
+  async function removeBot(botId) {
+    if (!confirm('Tem certeza que quer remover o bot?')) return;
+    const res = await fetch(`${BACKEND_URL}/bots/${botId}`, { method: 'DELETE' });
+    if (res.ok) alert('Bot removido!');
+    else alert('Erro ao remover bot');
+    loadBots();
+  }
+
+  async function loadBots(userId) {
+    const msg = document.getElementById('msg');
+    const botsContainer = document.getElementById('botsContainer');
+    if (!botsContainer) return;
+
+    msg.style.display = 'block';
+    msg.textContent = 'Carregando bots...';
+
+    const res = await fetch(`${BACKEND_URL}/bots/${userId}`);
+    if (!res.ok) {
+      msg.textContent = 'Erro ao carregar bots.';
+      return;
+    }
+    const data = await res.json();
+
+    botsContainer.innerHTML = '';
+    if (!data.bots || data.bots.length === 0) {
+      msg.textContent = 'Nenhum bot hospedado ainda.';
+      return;
+    }
+    msg.style.display = 'none';
+
+    data.bots.forEach(bot => {
+      const botElem = createBotElement(bot);
+      botsContainer.appendChild(botElem);
+    });
+  }
+
   function showUserPanel(user) {
     const content = document.getElementById('content');
     content.innerHTML = `
       <img class="avatar" src="https://cdn.discordapp.com/avatars/${user.user.id}/${user.user.avatar}.png" alt="Avatar" width="128" height="128" onerror="this.onerror=null;this.src='https://cdn.discordapp.com/embed/avatars/0.png'"/>
       <h2>${user.user.username}#${user.user.discriminator}</h2>
       <p>ID: ${user.user.id}</p>
-      <button id="btnVerBots" class="btn">📋 Ver Bots</button>
+      <button id="btnLogout" class="btn">Logout</button>
       <div id="msg" class="message"></div>
+      <div id="botsContainer" class="bots-list"></div>
     `;
 
-    const btn = document.getElementById('btnVerBots');
-    const msg = document.getElementById('msg');
+    document.getElementById('btnLogout').onclick = () => {
+      window.location.href = '/logout';
+    };
 
-    btn.addEventListener('click', async () => {
-      msg.style.display = 'block';
-      msg.textContent = 'Carregando bots...';
-
-      const res = await fetch(`${BACKEND_URL}/bots/${user.user.id}`);
-      const data = await res.json();
-
-      if (!data.bots || data.bots.length === 0) {
-        msg.textContent = '❌ Nenhum bot hospedado ainda.';
-        return;
-      }
-
-      msg.innerHTML = `<strong>Bots:</strong><br>` +
-        data.bots.map(bot => `${bot.name} — ${bot.status} — ${bot.ramUsage}`).join('<br>');
-    });
+    loadBots(user.user.id);
   }
 
   async function main() {
