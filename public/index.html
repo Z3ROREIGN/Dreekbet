@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>DreekBet Applications 🌐</title>
+<style>
+body {
+  margin: 0; font-family: Arial, sans-serif;
+  background: linear-gradient(135deg, #2c2f33, #23272a);
+  color: #fff; text-align: center;
+}
+header {
+  background: #7289da;
+  padding: 20px; font-size: 24px;
+  text-shadow: 1px 1px #000;
+}
+.banner {
+  margin: 20px;
+  font-size: 20px;
+  color: #b9bbbe;
+}
+.plans {
+  display: flex; justify-content: center; flex-wrap: wrap;
+}
+.plan {
+  background: #23272a; margin: 10px; padding: 20px;
+  border-radius: 8px; width: 200px; box-shadow: 0 0 10px #000;
+}
+.plan h2 { color: #7289da; }
+.plan p { font-size: 14px; }
+.btn {
+  background: #7289da; color: #fff; text-decoration: none;
+  display: inline-block; margin-top: 10px; padding: 8px 16px;
+  border-radius: 4px; transition: .3s;
+}
+.btn:hover { background: #5b6eae; }
+</style>
+</head>
+<body>
+
+<header>🌐 DreekBet Applications</header>
+<div class="banner">✨ Aposte nas suas aplicações!</div>
+
+<div class="plans">
+  <div class="plan">
+    <h2>Carbon</h2>
+    <p>💰 R$5</p>
+    <p>1 bot, 100MB RAM</p>
+    <a class="btn" href="https://discord.com/channels/SERVER_ID/CANAL_ID">Adquirir</a>
+  </div>
+  <div class="plan">
+    <h2>Golden</h2>
+    <p>💰 R$10</p>
+    <p>1 bot, 200MB RAM, suporte rápido</p>
+    <a class="btn" href="https://discord.com/channels/SERVER_ID/CANAL_ID">Adquirir</a>
+  </div>
+  <div class="plan">
+    <h2>Platinum</h2>
+    <p>💰 R$15</p>
+    <p>1 bot, 300MB RAM, suporte VIP</p>
+    <a class="btn" href="https://discord.com/channels/SERVER_ID/CANAL_ID">Adquirir</a>
+  </div>
+</div>
+
+<hr>
+<button class="btn" onclick="login()">Login com Discord</button>
+
+<script>
+function login() {
+  const clientId = 'SEU_CLIENT_ID';
+  const redirectUri = encodeURIComponent('https://dreekbet.shop');
+  const scope = encodeURIComponent('identify guilds guilds.join');
+  window.location.href = `https://discord.com/api/oauth2/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}`;
+}
+</script>
+
+</body>
+</html>
