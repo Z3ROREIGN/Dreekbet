@@ -3,11 +3,6 @@ import fetch from "node-fetch";
 const GUILD_ID = process.env.SEU_GUILD_ID;
 const ADMIN_ROLE_ID = process.env.SEU_ADMIN_ROLE_ID;
 
-const planos = {
-  "123": { ram: "512 MB", plano: "Carbon" },
-  "456": { ram: "1024 MB", plano: "Golden" },
-};
-
 export default async function handler(req, res) {
   const cookie = req.headers.cookie || "";
   const match = cookie.match(/user=([^;]+)/);
@@ -21,32 +16,52 @@ export default async function handler(req, res) {
   const member = await memberRes.json();
 
   const isAdmin = member.roles.includes(ADMIN_ROLE_ID);
-  const plano = planos[user.id] || { ram: "N/A", plano: "Nenhum" };
-  const roles = member.roles.map(r => `<span class="px-2 py-1 bg-gray-700 rounded">${r}</span>`).join(" ");
 
-  if (isAdmin) {
-    const todos = Object.entries(planos).map(
-      ([uid, p]) => `<tr><td>${uid}</td><td>${p.plano}</td><td>${p.ram}</td></tr>`
-    ).join("");
-    return res.send(`
-<html><head><script src="https://cdn.tailwindcss.com"></script></head><body class="bg-gray-900 text-white p-8">
-<h1 class="text-3xl text-indigo-400 mb-4">Painel do Administrador</h1>
-<p>Bem-vindo ${user.username}#${user.discriminator}</p>
-<table class="table-auto mt-6 w-full text-left">
-<thead><tr><th>ID</th><th>Plano</th><th>RAM</th></tr></thead>
-<tbody>${todos}</tbody></table>
-<a href="/" class="inline-block mt-6 text-indigo-300">Voltar</a>
-</body></html>`);
-  }
+  const planos = [
+    { nome: "Carbon", preco: 5, vantagens: ["512MB RAM", "1 Bot", "Suporte básico"] },
+    { nome: "Golden", preco: 10, vantagens: ["1GB RAM", "2 Bots", "Suporte prioritário"] },
+    { nome: "Platinum", preco: 15, vantagens: ["2GB RAM", "3 Bots", "Suporte VIP"] },
+  ];
+
+  const planoCards = planos
+    .map(
+      (p) => `
+      <div class="bg-gray-800 p-4 rounded shadow">
+        <h3 class="text-xl text-indigo-300">${p.nome}</h3>
+        <p class="text-lg">💸 R$ ${p.preco},00</p>
+        <ul class="text-sm mt-2">
+          ${p.vantagens.map(v => `<li>✅ ${v}</li>`).join("")}
+        </ul>
+        <button class="mt-4 bg-indigo-600 hover:bg-indigo-500 px-3 py-1 rounded">Adquirir</button>
+      </div>
+      `
+    )
+    .join("");
 
   res.send(`
-<html><head><script src="https://cdn.tailwindcss.com"></script></head><body class="bg-gray-900 text-white p-8">
-<h1 class="text-3xl text-indigo-400 mb-4">Seu Painel</h1>
-<p>Bem-vindo ${user.username}#${user.discriminator}</p>
-<p>ID: ${user.id}</p>
-<p>RAM: ${plano.ram}</p>
-<p>Plano: ${plano.plano}</p>
-<div>Cargos: ${roles}</div>
-<a href="/" class="inline-block mt-6 text-indigo-300">Voltar</a>
-</body></html>`);
+<html>
+<head><script src="https://cdn.tailwindcss.com"></script></head>
+<body class="bg-gray-900 text-white p-4">
+<header class="flex justify-between items-center mb-6">
+  <div class="text-2xl text-indigo-400 font-bold">DreekBet 🌐</div>
+  <div class="flex items-center gap-4">
+    <span>${user.username}#${user.discriminator}</span>
+    <img src="https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png" class="w-10 h-10 rounded-full">
+    <a href="/api/painel" class="bg-indigo-600 hover:bg-indigo-500 px-3 py-1 rounded">Painel</a>
+  </div>
+</header>
+
+<main class="grid grid-cols-1 md:grid-cols-3 gap-6">
+  ${planoCards}
+</main>
+
+${isAdmin ? `
+<section class="mt-10">
+  <h2 class="text-xl text-yellow-400">Administração</h2>
+  <p>Aqui você poderá gerenciar os usuários e bots.</p>
+  <a href="/api/admin" class="bg-yellow-500 px-3 py-1 rounded mt-4 inline-block">Painel Admin</a>
+</section>` : ""}
+
+</body></html>
+  `);
 }
