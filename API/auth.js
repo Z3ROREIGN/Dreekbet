@@ -1,17 +1,14 @@
-const express = require('express');
-const fetch = require('node-fetch');
-const jwt = require('jsonwebtoken');
-require('dotenv').config();
+import fetch from 'node-fetch';
+import jwt from 'jsonwebtoken';
 
-const app = express();
-const PORT = process.env.PORT || 3000;
-
-const ADMIN_ID = '1391419432257060914'; // seu ID admin
+const ADMIN_ID = '1098745384848859258';
 const JWT_SECRET = process.env.JWT_SECRET || 'troque_esse_segredo';
 
-app.get('/api/auth', async (req, res) => {
+export default async function handler(req, res) {
+  if (req.method !== 'GET') return res.status(405).json({ error: 'Method Not Allowed' });
+
   const code = req.query.code;
-  if (!code) return res.status(400).send("Código 'code' ausente.");
+  if (!code) return res.status(400).json({ error: "Código 'code' ausente." });
 
   const redirectUri = 'https://dreekbet.shop/api/auth';
 
@@ -33,13 +30,13 @@ app.get('/api/auth', async (req, res) => {
 
     if (!tokenRes.ok) {
       const text = await tokenRes.text();
-      return res.status(400).send(`Erro ao obter token: ${text}`);
+      return res.status(400).json({ error: `Erro ao obter token: ${text}` });
     }
 
     const tokenData = await tokenRes.json();
 
     if (!tokenData.access_token) {
-      return res.status(400).send('Não recebeu access_token');
+      return res.status(400).json({ error: 'Não recebeu access_token' });
     }
 
     const userRes = await fetch('https://discord.com/api/users/@me', {
@@ -48,12 +45,11 @@ app.get('/api/auth', async (req, res) => {
 
     if (!userRes.ok) {
       const text = await userRes.text();
-      return res.status(400).send(`Erro ao obter dados do usuário: ${text}`);
+      return res.status(400).json({ error: `Erro ao obter dados do usuário: ${text}` });
     }
 
     const userData = await userRes.json();
 
-    // Payload para JWT
     const payload = {
       id: userData.id,
       username: userData.username,
@@ -66,12 +62,9 @@ app.get('/api/auth', async (req, res) => {
 
     // Redireciona para painel com token JWT
     return res.redirect(`https://dreekbet.shop/painel.html?token=${jwtToken}`);
+
   } catch (error) {
     console.error(error);
-    return res.status(500).send('Erro interno na autenticação.');
+    return res.status(500).json({ error: 'Erro interno na autenticação.' });
   }
-});
-
-app.listen(PORT, () => {
-  console.log(`Servidor rodando na porta ${PORT}`);
-});
+}
