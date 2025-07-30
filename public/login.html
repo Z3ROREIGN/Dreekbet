@@ -1,40 +1,65 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8"/>
+  <meta charset="UTF-8">
   <title>DreekBet - Login</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <link rel="stylesheet" href="style.css"/>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    body {
+      background: linear-gradient(to right, #111, #1a1a1a);
+      color: white;
+      font-family: 'Segoe UI', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .login-box {
+      background: #222;
+      padding: 30px;
+      border-radius: 15px;
+      text-align: center;
+      box-shadow: 0 0 20px #000;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+      font-size: 28px;
+      color: #fff;
+    }
+
+    .login-button {
+      background-color: #5865F2;
+      color: white;
+      border: none;
+      padding: 12px 25px;
+      font-size: 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .login-button:hover {
+      background-color: #4752c4;
+    }
+  </style>
 </head>
 <body>
-  <div class="container" style="max-width: 380px; text-align:center;">
-    <h1>DreekBet</h1>
-    <p id="msg" style="margin-bottom:2rem; color: #a0d8ffcc;">Faça login via Discord para continuar</p>
-    <a id="loginBtn" class="button">Entrar com Discord</a>
+  <div class="login-box">
+    <h1>Entrar com o Discord</h1>
+    <button class="login-button" onclick="login()">Conectar com Discord</button>
   </div>
 
   <script>
-    const clientId = '1391419432257060914';
-    const redirectUri = 'https://dreekbet.shop/login.html';
-    const loginBtn = document.getElementById('loginBtn');
-    loginBtn.href = `https://discord.com/api/oauth2/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=identify%20email`;
-
-    const params = new URLSearchParams(window.location.search);
-    const code = params.get('code');
-    if (code) {
-      document.getElementById('msg').textContent = 'Verificando...';
-      fetch(`/api/auth?code=${encodeURIComponent(code)}`)
-        .then(r => r.json())
-        .then(data => {
-          if (data.error) throw new Error(data.error);
-          localStorage.setItem('dreekbet_jwt', data.token);
-          localStorage.setItem('dreekbet_user', JSON.stringify(data.user));
-          window.location.href = '/painel.html';
-        })
-        .catch(err => {
-          console.error(err);
-          document.getElementById('msg').textContent = 'Erro ao verificar: ' + err.message;
-        });
+    function login() {
+      const clientId = '1358987708579709042';
+      const redirectUri = encodeURIComponent('https://dreekbet.shop/api/auth');
+      const scope = encodeURIComponent('identify email');
+      const url = `https://discord.com/api/oauth2/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}`;
+      window.location.href = url;
     }
   </script>
 </body>
