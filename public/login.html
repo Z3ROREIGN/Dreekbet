@@ -1,65 +1,120 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>DreekBet - Login</title>
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css" />
   <style>
-    body {
-      background: linear-gradient(to right, #111, #1a1a1a);
-      color: white;
-      font-family: 'Segoe UI', sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
+    body, html {
+      height: 100%;
       margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      color: #f0f0f0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 1rem;
     }
 
-    .login-box {
-      background: #222;
-      padding: 30px;
+    .login-card {
+      background: rgba(15, 32, 39, 0.9);
+      max-width: 400px;
+      width: 100%;
+      padding: 3rem 2.5rem;
       border-radius: 15px;
+      box-shadow: 0 8px 32px rgba(0, 216, 255, 0.35);
       text-align: center;
-      box-shadow: 0 0 20px #000;
+      user-select: none;
     }
 
-    h1 {
-      margin-bottom: 20px;
-      font-size: 28px;
-      color: #fff;
+    .login-card h1 {
+      font-weight: 700;
+      font-size: 3.2rem;
+      margin-bottom: 1.5rem;
+      color: #00d8ff;
+      text-shadow: 0 0 10px #00d8ffcc;
+      letter-spacing: 3px;
     }
 
-    .login-button {
-      background-color: #5865F2;
-      color: white;
-      border: none;
-      padding: 12px 25px;
-      font-size: 18px;
-      border-radius: 8px;
+    .login-card p {
+      font-weight: 400;
+      font-size: 1.2rem;
+      margin-bottom: 2.5rem;
+      color: #a0cce0;
+      min-height: 28px;
+    }
+
+    .btn-discord {
+      display: inline-block;
+      width: 100%;
+      background: none;
+      border: 2.5px solid #00d8ff;
+      border-radius: 50px;
+      color: #00d8ff;
+      font-weight: 700;
+      font-size: 1.25rem;
+      padding: 16px 0;
       cursor: pointer;
-      transition: 0.3s;
+      text-decoration: none;
+      transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+      user-select: none;
     }
 
-    .login-button:hover {
-      background-color: #4752c4;
+    .btn-discord:hover,
+    .btn-discord:focus {
+      background-color: #00d8ff;
+      color: #011627;
+      box-shadow: 0 0 20px #00d8ffcc;
+      outline: none;
+      transform: translateY(-3px);
+    }
+
+    .error-message {
+      color: #ff5555;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      min-height: 24px;
+      text-shadow: 0 0 6px #ff5555cc;
+    }
+
+    @media (max-width: 480px) {
+      .login-card {
+        padding: 2rem 1.5rem;
+      }
+
+      .login-card h1 {
+        font-size: 2.5rem;
+        letter-spacing: 2px;
+      }
+
+      .btn-discord {
+        font-size: 1.1rem;
+        padding: 14px 0;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="login-box">
-    <h1>Entrar com o Discord</h1>
-    <button class="login-button" onclick="login()">Conectar com Discord</button>
-  </div>
+  <main class="login-card" role="main" aria-label="Login DreekBet">
+    <h1>DreekBet</h1>
+    <p id="message">Faça login para acessar seu painel.</p>
+    <a
+      href="https://discord.com/api/oauth2/authorize?client_id=1391419432257060914&redirect_uri=https%3A%2F%2Fdreekbet.shop%2Fapi%2Fauth&response_type=code&scope=identify%20email"
+      class="btn-discord"
+      >Entrar com Discord</a
+    >
+  </main>
 
   <script>
-    function login() {
-      const clientId = '1358987708579709042';
-      const redirectUri = encodeURIComponent('https://dreekbet.shop/api/auth');
-      const scope = encodeURIComponent('identify email');
-      const url = `https://discord.com/api/oauth2/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}`;
-      window.location.href = url;
+    const params = new URLSearchParams(window.location.search);
+    const error = params.get('error');
+    const message = document.getElementById('message');
+
+    if (error) {
+      message.textContent = `Erro no login: ${error}`;
+      message.classList.add('error-message');
     }
   </script>
 </body>
