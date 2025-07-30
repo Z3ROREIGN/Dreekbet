@@ -6,11 +6,11 @@ export default async function handler(req, res) {
   }
 
   const params = new URLSearchParams({
-    client_id: "1358987708579709042",
-    client_secret: process.env.DISCORD_CLIENT_SECRET,
+    client_id: "1358987708579709042", // seu client_id fixo aqui
+    client_secret: process.env.DISCORD_CLIENT_SECRET, // segredo seguro na env
     grant_type: "authorization_code",
     code,
-    redirect_uri: "https://dreekbet.shop/api/auth", // FIXO para evitar erro
+    redirect_uri: "https://dreekbet.shop/api/auth", // fixo para evitar erro
     scope: "identify email"
   });
 
@@ -18,7 +18,7 @@ export default async function handler(req, res) {
     const tokenRes = await fetch("https://discord.com/api/oauth2/token", {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: params
+      body: params.toString()
     });
 
     const tokenData = await tokenRes.json();
