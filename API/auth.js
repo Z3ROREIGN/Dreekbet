@@ -5,12 +5,13 @@ export default async function handler(req, res) {
     return res.status(400).send("Código 'code' ausente na URL.");
   }
 
+  // Parâmetros para troca do código pelo token OAuth2
   const params = new URLSearchParams({
-    client_id: "1391419432257060914", // seu client_id fixo aqui
-    client_secret: process.env.DISCORD_CLIENT_SECRET, // segredo seguro na env
+    client_id: process.env.DISCORD_CLIENT_ID,          // ENV variável na Vercel
+    client_secret: process.env.DISCORD_CLIENT_SECRET,  // ENV variável segura
     grant_type: "authorization_code",
     code,
-    redirect_uri: "https://dreekbet.shop/api/auth", // fixo para evitar erro
+    redirect_uri: process.env.DISCORD_REDIRECT_URI,    // ENV variável (ex: https://dreekbet.shop/api/auth)
     scope: "identify email"
   });
 
@@ -33,7 +34,9 @@ export default async function handler(req, res) {
 
     const userData = await userRes.json();
 
+    // Redireciona para a página login.html com o username na query string
     return res.redirect(`/login.html?user=${encodeURIComponent(userData.username)}`);
+
   } catch (err) {
     console.error(err);
     return res.status(500).send("Erro interno na autenticação.");
