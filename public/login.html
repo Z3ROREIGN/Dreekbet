@@ -1,54 +1,41 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8"/>
   <title>DreekBet - Login</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet" />
-  <style>
-    /* Copia do estilo oficial DreekBet */
-    *{margin:0;padding:0;box-sizing:border-box}
-    body{font-family:'Poppins',sans-serif;background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);color:#f0f0f0;min-height:100vh;display:flex;justify-content:center;align-items:center;padding:2rem}
-    .login-container{background:rgba(15,32,39,0.9);border-radius:16px;padding:3rem 4rem;width:380px;box-shadow:0 8px 30px rgba(0,216,255,0.4);text-align:center;user-select:none}
-    .login-container h1{font-weight:700;font-size:2.8rem;color:#00d8ff;margin-bottom:1.5rem;text-shadow:0 0 10px #00d8ffcc;letter-spacing:2px}
-    #welcomeMsg{margin-bottom:2rem;font-weight:500;font-size:1.1rem;color:#a0d8ffcc;min-height:28px}
-    a.button-login{display:inline-block;background:linear-gradient(90deg,#00d8ff 0%,#006bb3 100%);color:#011627;font-weight:700;padding:1rem 0;width:100%;border-radius:40px;font-size:1.25rem;text-decoration:none;box-shadow:0 5px 20px rgba(0,216,255,0.6);transition:all .3s ease;user-select:none}
-    a.button-login:hover{background:linear-gradient(90deg,#33ccff 0%,#005d99 100%);box-shadow:0 7px 30px rgba(51,204,255,0.8);transform:translateY(-2px)}
-  </style>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <link rel="stylesheet" href="style.css"/>
 </head>
 <body>
-  <div class="login-container">
+  <div class="container" style="max-width: 380px; text-align:center;">
     <h1>DreekBet</h1>
-    <p id="welcomeMsg">Por favor, faça login usando o botão abaixo.</p>
-    <a id="loginButton" class="button-login" href="#">Entrar com Discord</a>
+    <p id="msg" style="margin-bottom:2rem; color: #a0d8ffcc;">Faça login via Discord para continuar</p>
+    <a id="loginBtn" class="button">Entrar com Discord</a>
   </div>
 
   <script>
     const clientId = '1391419432257060914';
     const redirectUri = 'https://dreekbet.shop/login.html';
-    const scope = 'identify email';
-
-    const loginButton = document.getElementById('loginButton');
-    loginButton.href = `https://discord.com/api/oauth2/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${encodeURIComponent(scope)}`;
-
-    async function processCode(code) {
-      document.getElementById('welcomeMsg').textContent = 'Verificando...';
-      try {
-        const res = await fetch(`/api/auth?code=${encodeURIComponent(code)}`);
-        const data = await res.json();
-        if (data.error) throw new Error(data.error);
-        localStorage.setItem('dreekbet_jwt', data.token);
-        localStorage.setItem('dreekbet_user', JSON.stringify(data.user));
-        window.location.href = '/painel.html';
-      } catch(err) {
-        console.error(err);
-        document.getElementById('welcomeMsg').textContent = 'Falha na autenticação.';
-      }
-    }
+    const loginBtn = document.getElementById('loginBtn');
+    loginBtn.href = `https://discord.com/api/oauth2/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=identify%20email`;
 
     const params = new URLSearchParams(window.location.search);
     const code = params.get('code');
-    if (code) processCode(code);
+    if (code) {
+      document.getElementById('msg').textContent = 'Verificando...';
+      fetch(`/api/auth?code=${encodeURIComponent(code)}`)
+        .then(r => r.json())
+        .then(data => {
+          if (data.error) throw new Error(data.error);
+          localStorage.setItem('dreekbet_jwt', data.token);
+          localStorage.setItem('dreekbet_user', JSON.stringify(data.user));
+          window.location.href = '/painel.html';
+        })
+        .catch(err => {
+          console.error(err);
+          document.getElementById('msg').textContent = 'Erro ao verificar: ' + err.message;
+        });
+    }
   </script>
 </body>
 </html>
