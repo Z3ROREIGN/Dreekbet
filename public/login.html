@@ -1,269 +1,294 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8" />
-<title>DreekBet - Painel</title>
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet" />
-<style>
-  /* Seu CSS oficial adaptado aqui - resumido */
-  body {
-    font-family: 'Poppins', sans-serif;
-    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
-    color: #f0f0f0;
-    min-height: 100vh;
-    display: flex;
-    justify-content: center;
-    padding: 3rem 1rem 5rem;
-  }
-  .container {
-    max-width: 900px;
-    width: 100%;
-    background-color: rgba(15, 32, 39, 0.85);
-    border-radius: 20px;
-    padding: 3rem 3.5rem;
-    box-shadow: 0 8px 25px rgba(0, 216, 255, 0.4);
-    backdrop-filter: blur(15px);
-    display: flex;
-    flex-direction: column;
-    gap: 2rem;
-  }
-  h1, h2 {
-    color: #00d8ff;
-    text-shadow: 0 0 10px #00d8ffcc;
-  }
-  button {
-    cursor: pointer;
-    background: #00d8ff;
-    border: none;
-    border-radius: 50px;
-    padding: 1rem 1.8rem;
-    font-weight: 700;
-    color: #011627;
-    transition: background-color 0.3s ease;
-  }
-  button:hover {
-    background: #00b0cc;
-  }
-  .hidden { display: none; }
-</style>
+  <meta charset="UTF-8" />
+  <title>DreekBet - Login</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap');
+    * {
+      margin: 0; padding: 0; box-sizing: border-box;
+    }
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      color: #f0f0f0;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 2rem;
+    }
+    .login-container {
+      background: rgba(15, 32, 39, 0.9);
+      border-radius: 16px;
+      padding: 3rem 4rem;
+      width: 400px;
+      box-shadow: 0 8px 30px rgba(0,216,255,0.4);
+      text-align: center;
+      user-select: none;
+    }
+    .login-container h1 {
+      font-weight: 700;
+      font-size: 2.8rem;
+      color: #00d8ff;
+      margin-bottom: 1.5rem;
+      text-shadow: 0 0 10px #00d8ffcc;
+      letter-spacing: 2px;
+    }
+    #welcomeMsg {
+      margin-bottom: 2rem;
+      font-weight: 500;
+      font-size: 1.1rem;
+      color: #a0d8ffcc;
+      min-height: 28px;
+    }
+    a.button-login {
+      display: inline-block;
+      background: linear-gradient(90deg, #00d8ff 0%, #006bb3 100%);
+      color: #011627;
+      font-weight: 700;
+      padding: 1rem 0;
+      width: 100%;
+      border-radius: 40px;
+      font-size: 1.25rem;
+      text-decoration: none;
+      box-shadow: 0 5px 20px rgba(0,216,255,0.6);
+      transition: all 0.3s ease;
+      user-select: none;
+    }
+    a.button-login:hover {
+      background: linear-gradient(90deg, #33ccff 0%, #005d99 100%);
+      box-shadow: 0 7px 30px rgba(51,204,255,0.8);
+      transform: translateY(-2px);
+    }
+    /* Painel */
+    .panel {
+      margin-top: 2rem;
+      background: rgba(0,216,255,0.1);
+      border-radius: 12px;
+      padding: 1rem 1.5rem;
+      color: #d0e8ffcc;
+      font-size: 0.9rem;
+      user-select: text;
+      max-height: 350px;
+      overflow-y: auto;
+      text-align: left;
+    }
+    .panel h2 {
+      color: #00d8ff;
+      margin-bottom: 1rem;
+      font-weight: 600;
+    }
+    .btn-logout {
+      margin-top: 1rem;
+      padding: 0.5rem 1rem;
+      border: none;
+      background: #00b0cc;
+      color: #011627;
+      border-radius: 20px;
+      cursor: pointer;
+      font-weight: 700;
+      transition: background-color 0.3s ease;
+      user-select: none;
+    }
+    .btn-logout:hover {
+      background: #008ba3;
+    }
+    button.action-btn {
+      margin-top: 0.5rem;
+      padding: 0.4rem 0.8rem;
+      border: none;
+      background: #00d8ff;
+      color: #011627;
+      border-radius: 15px;
+      cursor: pointer;
+      font-weight: 600;
+      margin-right: 0.5rem;
+      transition: background-color 0.3s ease;
+      user-select: none;
+    }
+    button.action-btn:hover {
+      background: #009fcf;
+    }
+    /* Responsivo */
+    @media (max-width: 420px) {
+      .login-container {
+        width: 95vw;
+        padding: 2rem 1.5rem;
+      }
+    }
+  </style>
 </head>
 <body>
-  <main class="container" role="main">
+  <div class="login-container">
     <h1>DreekBet</h1>
-    <div id="loginSection">
-      <button id="btnLoginDiscord">Entrar com Discord</button>
+    <p id="welcomeMsg">Por favor, faça login usando o botão abaixo.</p>
+
+    <a
+      id="loginButton"
+      class="button-login"
+      href="#"
+    >
+      Entrar com Discord
+    </a>
+
+    <div id="userPanel" class="panel" style="display:none;">
+      <h2>Painel do Usuário</h2>
+      <div id="userInfo"></div>
+
+      <div id="ticketsSection" style="margin-top:1rem;">
+        <h3>Suporte / Tickets</h3>
+        <div id="ticketsList" style="max-height:120px; overflow-y:auto; background:#011627aa; padding:0.5rem; border-radius:8px; color:#a0d8ffcc;"></div>
+        <textarea id="ticketInput" placeholder="Descreva seu problema aqui..." style="width:100%; margin-top:0.5rem; border-radius:8px; padding:0.5rem; resize:none; font-family: 'Poppins', sans-serif;"></textarea>
+        <button id="openTicketBtn" class="action-btn">Abrir Ticket</button>
+      </div>
+
+      <div id="adminPanel" style="margin-top:1.5rem; display:none;">
+        <h3>Painel Administrativo</h3>
+        <p>Aqui você pode gerenciar pedidos, estoque e ajudar usuários.</p>
+        <button id="manageOrdersBtn" class="action-btn">Gerenciar Pedidos</button>
+        <button id="manageStockBtn" class="action-btn">Gerenciar Estoque</button>
+        <button id="supportUsersBtn" class="action-btn">Atender Usuários</button>
+        <div id="adminOutput" style="margin-top:1rem; background:#011627aa; padding:0.5rem; border-radius:8px; color:#a0d8ffcc; max-height:120px; overflow-y:auto;"></div>
+      </div>
+
+      <button id="logoutBtn" class="btn-logout">Sair</button>
     </div>
-    <div id="userPanel" class="hidden">
-      <p id="welcomeMsg"></p>
+  </div>
 
-      <section id="plansSection">
-        <h2>Seus Planos</h2>
-        <div id="plansList"></div>
-      </section>
+  <script src="https://cdn.jsdelivr.net/npm/jsonwebtoken@9.0.0/index.min.js"></script>
+  <script>
+    const clientId = '1391419432257060914';
+    const redirectUri = 'https://dreekbet.shop/api/auth';
+    const scope = 'identify email';
+    const loginButton = document.getElementById('loginButton');
+    const welcomeMsg = document.getElementById('welcomeMsg');
+    const userPanel = document.getElementById('userPanel');
+    const userInfo = document.getElementById('userInfo');
+    const ticketsSection = document.getElementById('ticketsSection');
+    const ticketsList = document.getElementById('ticketsList');
+    const ticketInput = document.getElementById('ticketInput');
+    const openTicketBtn = document.getElementById('openTicketBtn');
+    const adminPanel = document.getElementById('adminPanel');
+    const manageOrdersBtn = document.getElementById('manageOrdersBtn');
+    const manageStockBtn = document.getElementById('manageStockBtn');
+    const supportUsersBtn = document.getElementById('supportUsersBtn');
+    const adminOutput = document.getElementById('adminOutput');
+    const logoutBtn = document.getElementById('logoutBtn');
 
-      <section id="botsSection">
-        <h2>Seus Bots</h2>
-        <div id="botsList"></div>
-      </section>
+    const ADMIN_ID = '1098745384848859258';
 
-      <section id="ticketsSection">
-        <h2>Suporte - Tickets</h2>
-        <button id="btnNewTicket">Abrir Novo Ticket</button>
-        <ul id="ticketsList"></ul>
-      </section>
+    loginButton.href = `https://discord.com/api/oauth2/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${encodeURIComponent(scope)}`;
 
-      <button id="btnLogout">Logout</button>
-    </div>
-
-    <div id="adminPanel" class="hidden">
-      <h2>Painel de Administração</h2>
-      <p>Gerencie pedidos, tickets, estoque e usuários aqui.</p>
-      <!-- Pode expandir futuramente -->
-    </div>
-  </main>
-
-<script>
-  const clientId = '1358987708579709042';
-  const redirectUri = encodeURIComponent('https://dreekbet.shop/api/auth');
-  const scope = encodeURIComponent('identify email');
-
-  const btnLoginDiscord = document.getElementById('btnLoginDiscord');
-  const loginSection = document.getElementById('loginSection');
-  const userPanel = document.getElementById('userPanel');
-  const adminPanel = document.getElementById('adminPanel');
-  const welcomeMsg = document.getElementById('welcomeMsg');
-  const btnLogout = document.getElementById('btnLogout');
-  const plansList = document.getElementById('plansList');
-  const botsList = document.getElementById('botsList');
-  const ticketsList = document.getElementById('ticketsList');
-  const btnNewTicket = document.getElementById('btnNewTicket');
-
-  const ADMIN_DISCORD_ID = '1098745384848859258';
-
-  // Redireciona para login Discord OAuth2
-  btnLoginDiscord.onclick = () => {
-    window.location.href = `https://discord.com/api/oauth2/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}`;
-  };
-
-  // Após voltar da autenticação no backend /api/auth (que retorna JSON { token }),
-  // o token deve ser guardado localStorage para autenticação nos endpoints.
-  // Aqui simulamos parsear o code da URL e chamar backend.
-
-  async function handleOAuthCallback() {
-    const params = new URLSearchParams(window.location.search);
-    const code = params.get('code');
-
-    if (!code) return; // não está na callback
-
-    // Chama backend para trocar code por JWT
-    try {
-      const res = await fetch(`/api/auth?code=${code}`);
-      if (!res.ok) throw new Error('Falha na autenticação');
-
-      const data = await res.json();
-      if (!data.token) throw new Error('Token JWT não recebido');
-
-      localStorage.setItem('token', data.token);
-      window.history.replaceState({}, '', '/login.html'); // limpa URL do code
-      initApp();
-    } catch (err) {
-      alert('Erro ao logar: ' + err.message);
-    }
-  }
-
-  function decodeJWT(token) {
-    try {
-      const base64Url = token.split('.')[1];
-      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-      const jsonPayload = decodeURIComponent(
-        atob(base64)
-          .split('')
-          .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
-          .join('')
-      );
-      return JSON.parse(jsonPayload);
-    } catch {
-      return null;
-    }
-  }
-
-  // Simula chamada API para pegar dados do usuário, bots, planos, tickets
-  async function fetchUserData(token) {
-    // Aqui você deve chamar seus endpoints reais usando o token Bearer
-    // Vou simular dados abaixo
-    return {
-      id: '1098745384848859258',
-      username: 'Willian',
-      email: 'willian@example.com',
-      bots: [
-        { id: 'bot1', name: 'DreekBot', status: 'online' },
-        { id: 'bot2', name: 'HelperBot', status: 'offline' },
-      ],
-      plans: [
-        { id: 'plan1', name: 'Plano Básico', price: 'R$ 15,00', desc: '1 bot hospedado' },
-        { id: 'plan2', name: 'Plano Pro', price: 'R$ 40,00', desc: '3 bots hospedados + suporte VIP' },
-      ],
-      tickets: [
-        { id: 'ticket1', subject: 'Problema com bot', status: 'Aberto' },
-        { id: 'ticket2', subject: 'Dúvida sobre planos', status: 'Fechado' },
-      ],
+    // Sair e limpar localStorage
+    logoutBtn.onclick = () => {
+      localStorage.removeItem('jwtToken');
+      localStorage.removeItem('user');
+      window.location.href = window.location.pathname;
     };
-  }
 
-  function renderUserPanel(userData) {
-    welcomeMsg.textContent = `Olá, ${userData.username}!`;
+    // Pega parâmetro da URL
+    function getQueryParam(param) {
+      const params = new URLSearchParams(window.location.search);
+      return params.get(param);
+    }
 
-    // Bots
-    botsList.innerHTML = '';
-    userData.bots.forEach(bot => {
-      const div = document.createElement('div');
-      div.className = 'bot-item';
-      div.textContent = `${bot.name} — Status: ${bot.status}`;
-      botsList.appendChild(div);
-    });
+    async function fetchUserData(code) {
+      try {
+        const res = await fetch(`/api/auth?code=${encodeURIComponent(code)}`);
+        if (!res.ok) throw new Error('Falha na autenticação');
+        const data = await res.json();
+        return data;
+      } catch (e) {
+        console.error(e);
+        return null;
+      }
+    }
 
-    // Planos
-    plansList.innerHTML = '';
-    userData.plans.forEach(plan => {
-      const div = document.createElement('div');
-      div.className = 'plano-card';
-      div.innerHTML = `
-        <div class="plano-nome">${plan.name}</div>
-        <div class="plano-preco">${plan.price}</div>
-        <div class="plano-desc">${plan.desc}</div>
-        <button class="btn-comprar-plano" data-id="${plan.id}">Comprar</button>
+    function clearUrlCode() {
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+
+    // Simula tickets no frontend (normalmente ficaria no banco)
+    let tickets = [];
+
+    function renderTickets() {
+      if (tickets.length === 0) {
+        ticketsList.innerHTML = '<p style="color:#777;">Nenhum ticket aberto.</p>';
+        return;
+      }
+      ticketsList.innerHTML = tickets.map((t, i) => 
+        `<div style="padding:0.3rem 0; border-bottom:1px solid #00d8ff44;">
+          <strong>Ticket #${i+1}:</strong> ${t}
+        </div>`).join('');
+    }
+
+    openTicketBtn.onclick = () => {
+      const text = ticketInput.value.trim();
+      if (!text) return alert('Digite uma descrição para abrir o ticket.');
+      tickets.push(text);
+      ticketInput.value = '';
+      renderTickets();
+      alert('Ticket aberto! A equipe de suporte entrará em contato.');
+    };
+
+    async function init() {
+      const storedToken = localStorage.getItem('jwtToken');
+      const storedUser = localStorage.getItem('user');
+
+      if (storedToken && storedUser) {
+        const user = JSON.parse(storedUser);
+        showUserPanel(user);
+        return;
+      }
+
+      const code = getQueryParam('code');
+      if (code) {
+        welcomeMsg.textContent = 'Autenticando...';
+        const data = await fetchUserData(code);
+        if (data && data.token && data.user) {
+          localStorage.setItem('jwtToken', data.token);
+          localStorage.setItem('user', JSON.stringify(data.user));
+          showUserPanel(data.user);
+          clearUrlCode();
+        } else {
+          welcomeMsg.textContent = 'Falha na autenticação. Tente novamente.';
+        }
+      }
+    }
+
+    function showUserPanel(user) {
+      welcomeMsg.style.display = 'none';
+      loginButton.style.display = 'none';
+      userPanel.style.display = 'block';
+
+      userInfo.innerHTML = `
+        <p><strong>Usuário:</strong> ${user.username}#${user.discriminator}</p>
+        <p><strong>ID Discord:</strong> ${user.id}</p>
+        <p><strong>Permissão:</strong> ${user.isAdmin ? 'Administrador' : 'Usuário'}</p>
       `;
-      plansList.appendChild(div);
-    });
 
-    // Tickets
-    ticketsList.innerHTML = '';
-    userData.tickets.forEach(ticket => {
-      const li = document.createElement('li');
-      li.textContent = `${ticket.subject} — Status: ${ticket.status}`;
-      ticketsList.appendChild(li);
-    });
-  }
+      if (user.isAdmin) {
+        adminPanel.style.display = 'block';
 
-  function initApp() {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      loginSection.classList.remove('hidden');
-      userPanel.classList.add('hidden');
-      adminPanel.classList.add('hidden');
-      return;
+        manageOrdersBtn.onclick = () => {
+          adminOutput.textContent = 'Exemplo: Listando pedidos pendentes...';
+          // Aqui você faria requisições para backend e exibiria dados reais
+        };
+        manageStockBtn.onclick = () => {
+          adminOutput.textContent = 'Exemplo: Gerenciando estoque...';
+        };
+        supportUsersBtn.onclick = () => {
+          adminOutput.textContent = 'Exemplo: Atendendo usuários via tickets...';
+        };
+      } else {
+        adminPanel.style.display = 'none';
+      }
+
+      renderTickets();
     }
 
-    const payload = decodeJWT(token);
-    if (!payload) {
-      localStorage.removeItem('token');
-      alert('Token inválido, faça login novamente');
-      return;
-    }
-
-    loginSection.classList.add('hidden');
-    userPanel.classList.remove('hidden');
-
-    // Admin ou user normal
-    if (payload.id === ADMIN_DISCORD_ID) {
-      adminPanel.classList.remove('hidden');
-    } else {
-      adminPanel.classList.add('hidden');
-    }
-
-    fetchUserData(token)
-      .then(data => renderUserPanel(data))
-      .catch(() => {
-        alert('Erro ao carregar dados do usuário');
-        localStorage.removeItem('token');
-        location.reload();
-      });
-  }
-
-  btnLogout.onclick = () => {
-    localStorage.removeItem('token');
-    location.reload();
-  };
-
-  // Compra de plano - evento delegado
-  plansList.addEventListener('click', e => {
-    if (e.target.classList.contains('btn-comprar-plano')) {
-      const planId = e.target.dataset.id;
-      alert(`Compra do plano ${planId} - você deve implementar a integração real`);
-    }
-  });
-
-  // Novo ticket - evento simples
-  btnNewTicket.onclick = () => {
-    const assunto = prompt('Descreva o assunto do ticket:');
-    if (assunto) alert(`Ticket criado: ${assunto} (implemente backend)`);
-  };
-
-  // Inicia a app ao carregar
-  window.onload = () => {
-    handleOAuthCallback().then(() => initApp());
-  };
-</script>
+    window.onload = init;
+  </script>
 </body>
 </html>
