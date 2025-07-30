@@ -36,10 +36,10 @@ export default async function handler(req, res) {
 
     const userData = await userResponse.json();
 
-    // Aqui você pode redirecionar ou salvar o token em cookie
-    // ou armazenar no localStorage via frontend, como preferir
+    // Redireciona com o nome do usuário após autenticar
     return res.redirect(`/login.html?user=${encodeURIComponent(userData.username)}`);
   } catch (err) {
+    console.error(err);
     return res.status(500).send("Erro ao autenticar.");
   }
 }
