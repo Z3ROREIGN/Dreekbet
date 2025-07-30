@@ -1,55 +1,45 @@
-// api/auth.js (Node.js + Express para Vercel)
-
-import fetch from 'node-fetch';
-
-const CLIENT_ID = process.env.DISCORD_CLIENT_ID;
-const CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET;
-const REDIRECT_URI = 'https://dreekbet.shop/login.html'; // ou sua URL de login
-const SCOPE = 'identify';
-
 export default async function handler(req, res) {
   const code = req.query.code;
+
   if (!code) {
-    // Redirecionar para o Discord OAuth
-    const discordAuthUrl = `https://discord.com/api/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=code&scope=${SCOPE}`;
-    res.writeHead(302, { Location: discordAuthUrl });
-    return res.end();
+    return res.status(400).send("Código ausente na URL.");
   }
 
+  const params = new URLSearchParams();
+  params.append("client_id", process.env.DISCORD_CLIENT_ID);
+  params.append("client_secret", process.env.DISCORD_CLIENT_SECRET);
+  params.append("grant_type", "authorization_code");
+  params.append("code", code);
+  params.append("redirect_uri", process.env.DISCORD_REDIRECT_URI);
+  params.append("scope", "identify email");
+
   try {
-    // Trocar code por access_token
-    const params = new URLSearchParams();
-    params.append('client_id', CLIENT_ID);
-    params.append('client_secret', CLIENT_SECRET);
-    params.append('grant_type', 'authorization_code');
-    params.append('code', code);
-    params.append('redirect_uri', REDIRECT_URI);
-    params.append('scope', SCOPE);
-
-    const tokenRes = await fetch('https://discord.com/api/oauth2/token', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: params.toString(),
+    const tokenResponse = await fetch("https://discord.com/api/oauth2/token", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: params,
     });
-    const tokenData = await tokenRes.json();
 
-    if (!tokenData.access_token) {
-      return res.status(400).json({ error: 'Falha ao obter token' });
+    const tokenData = await tokenResponse.json();
+
+    if (tokenData.error) {
+      return res.status(400).json(tokenData);
     }
 
-    // Pega dados do usuário
-    const userRes = await fetch('https://discord.com/api/users/@me', {
-      headers: { Authorization: `Bearer ${tokenData.access_token}` },
+    const userResponse = await fetch("https://discord.com/api/users/@me", {
+      headers: {
+        Authorization: `${tokenData.token_type} ${tokenData.access_token}`,
+      },
     });
-    const userData = await userRes.json();
 
-    // Retorna dados do usuário e token para o front-end
-    res.status(200).json({
-      user: userData,
-      access_token: tokenData.access_token,
-      refresh_token: tokenData.refresh_token,
-    });
+    const userData = await userResponse.json();
+
+    // Aqui você pode redirecionar ou salvar o token em cookie
+    // ou armazenar no localStorage via frontend, como preferir
+    return res.redirect(`/login.html?user=${encodeURIComponent(userData.username)}`);
   } catch (err) {
-    res.status(500).json({ error: 'Erro interno na autenticação' });
+    return res.status(500).send("Erro ao autenticar.");
   }
 }
