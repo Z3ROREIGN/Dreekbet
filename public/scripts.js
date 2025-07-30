@@ -1,6 +1,13 @@
+// Carrinho salvo no localStorage
 let carrinho = JSON.parse(localStorage.getItem('carrinho')) || [];
 
-function adicionarAoCarrinho(id, nome, preco, zipUrl) {
+// Adiciona produto ao carrinho
+function adicionarAoCarrinho(id, nome, preco) {
+  const zipUrls = {
+    1: 'https://seulink.com/botverificador.zip',
+    2: 'https://seulink.com/botdevendas.zip',
+  };
+  const zipUrl = zipUrls[id] || '';
   const itemIndex = carrinho.findIndex(i => i.id === id);
   if (itemIndex > -1) {
     carrinho[itemIndex].quantidade++;
@@ -12,6 +19,7 @@ function adicionarAoCarrinho(id, nome, preco, zipUrl) {
   atualizarCarrinhoVisual();
 }
 
+// Atualiza a visualização do carrinho (para carrinho.html)
 function atualizarCarrinhoVisual() {
   const div = document.getElementById('itens-carrinho');
   if (!div) return;
@@ -34,12 +42,14 @@ function atualizarCarrinhoVisual() {
   div.appendChild(pTotal);
 }
 
+// Limpa o carrinho
 function limparCarrinho() {
   carrinho = [];
   localStorage.removeItem('carrinho');
   atualizarCarrinhoVisual();
 }
 
+// Finaliza compra e envia pedido para API (hospedar bot)
 async function finalizarCompra() {
   const tokenData = JSON.parse(localStorage.getItem('discord_auth'));
   if (!tokenData || !tokenData.user) {
@@ -75,10 +85,12 @@ async function finalizarCompra() {
   limparCarrinho();
 }
 
+// Salva dados do usuário no localStorage
 function salvarAuth(discordUser, accessToken) {
   localStorage.setItem('discord_auth', JSON.stringify({ user: discordUser, accessToken }));
 }
 
+// Faz login via Discord pelo endpoint /api/auth?code=...
 async function loginDiscord() {
   const code = new URLSearchParams(window.location.search).get('code');
   if (code) {
@@ -87,6 +99,16 @@ async function loginDiscord() {
     if (data.user) {
       salvarAuth(data.user, data.access_token);
       alert(`Bem-vindo, ${data.user.username}!`);
-      window.location.href = 'index.html';
-    } else
-      
+      // Remove o ?code da URL para evitar repetir login
+      window.history.replaceState({}, document.title, window.location.pathname);
+    } else {
+      alert('Erro no login. Tente novamente.');
+    }
+  }
+}
+
+// Atualiza carrinho e tenta login ao carregar a página
+document.addEventListener('DOMContentLoaded', () => {
+  atualizarCarrinhoVisual();
+  loginDiscord();
+});
