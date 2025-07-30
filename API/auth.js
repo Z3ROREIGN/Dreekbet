@@ -6,7 +6,7 @@ export default async function handler(req, res) {
   }
 
   const params = new URLSearchParams({
-    client_id: "1358987708579709042", // seu client_id fixo aqui
+    client_id: "1391419432257060914", // seu client_id fixo aqui
     client_secret: process.env.DISCORD_CLIENT_SECRET, // segredo seguro na env
     grant_type: "authorization_code",
     code,
