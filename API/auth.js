@@ -2,43 +2,40 @@ export default async function handler(req, res) {
   const code = req.query.code;
 
   if (!code) {
-    return res.status(400).json({ error: "Código ausente na URL." });
+    return res.status(400).send("Código 'code' ausente na URL.");
   }
 
-  const params = new URLSearchParams();
-  params.append("client_id", process.env.DISCORD_CLIENT_ID);
-  params.append("client_secret", process.env.DISCORD_CLIENT_SECRET);
-  params.append("grant_type", "authorization_code");
-  params.append("code", code);
-  params.append("redirect_uri", process.env.DISCORD_REDIRECT_URI);
-  params.append("scope", "identify email");
+  const params = new URLSearchParams({
+    client_id: process.env.DISCORD_CLIENT_ID,
+    client_secret: process.env.DISCORD_CLIENT_SECRET,
+    grant_type: "authorization_code",
+    code,
+    redirect_uri: process.env.DISCORD_REDIRECT_URI,
+    scope: "identify email"
+  });
 
   try {
-    const tokenResponse = await fetch("https://discord.com/api/oauth2/token", {
+    const tokenRes = await fetch("https://discord.com/api/oauth2/token", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-      body: params,
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: params
     });
 
-    const tokenData = await tokenResponse.json();
+    const tokenData = await tokenRes.json();
 
-    if (tokenData.error) {
-      return res.status(400).json(tokenData);
+    if (!tokenData.access_token) {
+      return res.status(400).json({ error: "Não recebeu access_token", data: tokenData });
     }
 
-    const userResponse = await fetch("https://discord.com/api/users/@me", {
-      headers: {
-        Authorization: `${tokenData.token_type} ${tokenData.access_token}`,
-      },
+    const userRes = await fetch("https://discord.com/api/users/@me", {
+      headers: { Authorization: `Bearer ${tokenData.access_token}` }
     });
 
-    const userData = await userResponse.json();
+    const userData = await userRes.json();
 
     return res.redirect(`/login.html?user=${encodeURIComponent(userData.username)}`);
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ error: "Erro ao autenticar com o Discord." });
+    return res.status(500).send("Erro interno na autenticação.");
   }
 }
