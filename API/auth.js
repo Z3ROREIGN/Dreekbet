@@ -13,9 +13,9 @@ app.use(express.json());
 
 app.get('/api/auth', async (req, res) => {
   const code = req.query.code;
-  if (!code) return res.status(400).send("Código 'code' ausente.");
+  if (!code) return res.status(400).json({ error: "Código 'code' ausente." });
 
-  const redirectUri = 'https://dreekbet.shop/api/auth';
+  const redirectUri = 'https://dreekbet.shop/login.html';
 
   const params = new URLSearchParams({
     client_id: '1391419432257060914',
@@ -35,7 +35,7 @@ app.get('/api/auth', async (req, res) => {
 
     if (!tokenRes.ok) {
       const text = await tokenRes.text();
-      return res.status(400).send(`Erro ao obter token: ${text}`);
+      return res.status(400).json({ error: `Erro ao obter token: ${text}` });
     }
 
     const tokenData = await tokenRes.json();
@@ -50,12 +50,11 @@ app.get('/api/auth', async (req, res) => {
 
     if (!userRes.ok) {
       const text = await userRes.text();
-      return res.status(400).send(`Erro ao obter dados do usuário: ${text}`);
+      return res.status(400).json({ error: `Erro ao obter dados do usuário: ${text}` });
     }
 
     const userData = await userRes.json();
 
-    // Cria JWT com os dados do usuário e se é admin
     const payload = {
       id: userData.id,
       username: userData.username,
@@ -65,12 +64,10 @@ app.get('/api/auth', async (req, res) => {
 
     const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '12h' });
 
-    // Retorna token e usuário para o frontend
     return res.json({ token, user: payload });
-
   } catch (err) {
     console.error(err);
-    return res.status(500).send("Erro interno na autenticação.");
+    return res.status(500).json({ error: "Erro interno na autenticação." });
   }
 });
 
