@@ -1,102 +1,269 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <title>DreekBet - Login</title>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap');
-
-    * {
-      margin: 0; padding: 0; box-sizing: border-box;
-    }
-
-    body {
-      font-family: 'Poppins', sans-serif;
-      background: linear-gradient(135deg, #12052e 0%, #4b28a6 100%);
-      color: #eaeaea;
-      height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .login-container {
-      background: #1e133d;
-      border-radius: 20px;
-      padding: 40px 50px;
-      width: 360px;
-      box-shadow: 0 8px 25px rgba(75, 40, 166, 0.7);
-      text-align: center;
-    }
-
-    .login-container h1 {
-      font-weight: 700;
-      font-size: 2.8rem;
-      color: #a381f7;
-      margin-bottom: 24px;
-      text-shadow: 0 0 15px #a381f7;
-    }
-
-    #welcomeMsg {
-      font-weight: 500;
-      font-size: 1.2rem;
-      margin-bottom: 32px;
-      min-height: 24px;
-      color: #c8baff;
-    }
-
-    a.button-login {
-      display: inline-block;
-      background: linear-gradient(90deg, #7658ff 0%, #3a2bdc 100%);
-      color: #fff;
-      font-weight: 700;
-      padding: 15px 0;
-      width: 100%;
-      border-radius: 40px;
-      font-size: 1.15rem;
-      text-decoration: none;
-      box-shadow: 0 4px 15px rgba(118, 88, 255, 0.7);
-      transition: all 0.3s ease;
-      user-select: none;
-    }
-
-    a.button-login:hover {
-      background: linear-gradient(90deg, #8e77ff 0%, #533cdc 100%);
-      box-shadow: 0 6px 20px rgba(142, 119, 255, 0.9);
-      transform: translateY(-2px);
-    }
-
-    /* Mobile */
-    @media (max-width: 400px) {
-      .login-container {
-        width: 90vw;
-        padding: 30px 20px;
-      }
-    }
-  </style>
+<meta charset="UTF-8" />
+<title>DreekBet - Painel</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  /* Seu CSS oficial adaptado aqui - resumido */
+  body {
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+    color: #f0f0f0;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding: 3rem 1rem 5rem;
+  }
+  .container {
+    max-width: 900px;
+    width: 100%;
+    background-color: rgba(15, 32, 39, 0.85);
+    border-radius: 20px;
+    padding: 3rem 3.5rem;
+    box-shadow: 0 8px 25px rgba(0, 216, 255, 0.4);
+    backdrop-filter: blur(15px);
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+  h1, h2 {
+    color: #00d8ff;
+    text-shadow: 0 0 10px #00d8ffcc;
+  }
+  button {
+    cursor: pointer;
+    background: #00d8ff;
+    border: none;
+    border-radius: 50px;
+    padding: 1rem 1.8rem;
+    font-weight: 700;
+    color: #011627;
+    transition: background-color 0.3s ease;
+  }
+  button:hover {
+    background: #00b0cc;
+  }
+  .hidden { display: none; }
+</style>
 </head>
 <body>
-  <div class="login-container">
+  <main class="container" role="main">
     <h1>DreekBet</h1>
-    <p id="welcomeMsg">Carregando...</p>
-    <a
-      class="button-login"
-      href="https://discord.com/api/oauth2/authorize?client_id=1358987708579709042&redirect_uri=https%3A%2F%2Fdreekbet.shop%2Fapi%2Fauth&response_type=code&scope=identify%20email"
-    >
-      Entrar com Discord
-    </a>
-  </div>
+    <div id="loginSection">
+      <button id="btnLoginDiscord">Entrar com Discord</button>
+    </div>
+    <div id="userPanel" class="hidden">
+      <p id="welcomeMsg"></p>
 
-  <script>
-    const urlParams = new URLSearchParams(window.location.search);
-    const user = urlParams.get("user");
-    const welcomeMsg = document.getElementById("welcomeMsg");
+      <section id="plansSection">
+        <h2>Seus Planos</h2>
+        <div id="plansList"></div>
+      </section>
 
-    if (user) {
-      welcomeMsg.textContent = `Olá, ${user}! Você está logado.`;
-    } else {
-      welcomeMsg.textContent = "Por favor, faça login usando o botão abaixo.";
+      <section id="botsSection">
+        <h2>Seus Bots</h2>
+        <div id="botsList"></div>
+      </section>
+
+      <section id="ticketsSection">
+        <h2>Suporte - Tickets</h2>
+        <button id="btnNewTicket">Abrir Novo Ticket</button>
+        <ul id="ticketsList"></ul>
+      </section>
+
+      <button id="btnLogout">Logout</button>
+    </div>
+
+    <div id="adminPanel" class="hidden">
+      <h2>Painel de Administração</h2>
+      <p>Gerencie pedidos, tickets, estoque e usuários aqui.</p>
+      <!-- Pode expandir futuramente -->
+    </div>
+  </main>
+
+<script>
+  const clientId = '1358987708579709042';
+  const redirectUri = encodeURIComponent('https://dreekbet.shop/api/auth');
+  const scope = encodeURIComponent('identify email');
+
+  const btnLoginDiscord = document.getElementById('btnLoginDiscord');
+  const loginSection = document.getElementById('loginSection');
+  const userPanel = document.getElementById('userPanel');
+  const adminPanel = document.getElementById('adminPanel');
+  const welcomeMsg = document.getElementById('welcomeMsg');
+  const btnLogout = document.getElementById('btnLogout');
+  const plansList = document.getElementById('plansList');
+  const botsList = document.getElementById('botsList');
+  const ticketsList = document.getElementById('ticketsList');
+  const btnNewTicket = document.getElementById('btnNewTicket');
+
+  const ADMIN_DISCORD_ID = '1098745384848859258';
+
+  // Redireciona para login Discord OAuth2
+  btnLoginDiscord.onclick = () => {
+    window.location.href = `https://discord.com/api/oauth2/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}`;
+  };
+
+  // Após voltar da autenticação no backend /api/auth (que retorna JSON { token }),
+  // o token deve ser guardado localStorage para autenticação nos endpoints.
+  // Aqui simulamos parsear o code da URL e chamar backend.
+
+  async function handleOAuthCallback() {
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get('code');
+
+    if (!code) return; // não está na callback
+
+    // Chama backend para trocar code por JWT
+    try {
+      const res = await fetch(`/api/auth?code=${code}`);
+      if (!res.ok) throw new Error('Falha na autenticação');
+
+      const data = await res.json();
+      if (!data.token) throw new Error('Token JWT não recebido');
+
+      localStorage.setItem('token', data.token);
+      window.history.replaceState({}, '', '/login.html'); // limpa URL do code
+      initApp();
+    } catch (err) {
+      alert('Erro ao logar: ' + err.message);
     }
-  </script>
+  }
+
+  function decodeJWT(token) {
+    try {
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = decodeURIComponent(
+        atob(base64)
+          .split('')
+          .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+          .join('')
+      );
+      return JSON.parse(jsonPayload);
+    } catch {
+      return null;
+    }
+  }
+
+  // Simula chamada API para pegar dados do usuário, bots, planos, tickets
+  async function fetchUserData(token) {
+    // Aqui você deve chamar seus endpoints reais usando o token Bearer
+    // Vou simular dados abaixo
+    return {
+      id: '1098745384848859258',
+      username: 'Willian',
+      email: 'willian@example.com',
+      bots: [
+        { id: 'bot1', name: 'DreekBot', status: 'online' },
+        { id: 'bot2', name: 'HelperBot', status: 'offline' },
+      ],
+      plans: [
+        { id: 'plan1', name: 'Plano Básico', price: 'R$ 15,00', desc: '1 bot hospedado' },
+        { id: 'plan2', name: 'Plano Pro', price: 'R$ 40,00', desc: '3 bots hospedados + suporte VIP' },
+      ],
+      tickets: [
+        { id: 'ticket1', subject: 'Problema com bot', status: 'Aberto' },
+        { id: 'ticket2', subject: 'Dúvida sobre planos', status: 'Fechado' },
+      ],
+    };
+  }
+
+  function renderUserPanel(userData) {
+    welcomeMsg.textContent = `Olá, ${userData.username}!`;
+
+    // Bots
+    botsList.innerHTML = '';
+    userData.bots.forEach(bot => {
+      const div = document.createElement('div');
+      div.className = 'bot-item';
+      div.textContent = `${bot.name} — Status: ${bot.status}`;
+      botsList.appendChild(div);
+    });
+
+    // Planos
+    plansList.innerHTML = '';
+    userData.plans.forEach(plan => {
+      const div = document.createElement('div');
+      div.className = 'plano-card';
+      div.innerHTML = `
+        <div class="plano-nome">${plan.name}</div>
+        <div class="plano-preco">${plan.price}</div>
+        <div class="plano-desc">${plan.desc}</div>
+        <button class="btn-comprar-plano" data-id="${plan.id}">Comprar</button>
+      `;
+      plansList.appendChild(div);
+    });
+
+    // Tickets
+    ticketsList.innerHTML = '';
+    userData.tickets.forEach(ticket => {
+      const li = document.createElement('li');
+      li.textContent = `${ticket.subject} — Status: ${ticket.status}`;
+      ticketsList.appendChild(li);
+    });
+  }
+
+  function initApp() {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      loginSection.classList.remove('hidden');
+      userPanel.classList.add('hidden');
+      adminPanel.classList.add('hidden');
+      return;
+    }
+
+    const payload = decodeJWT(token);
+    if (!payload) {
+      localStorage.removeItem('token');
+      alert('Token inválido, faça login novamente');
+      return;
+    }
+
+    loginSection.classList.add('hidden');
+    userPanel.classList.remove('hidden');
+
+    // Admin ou user normal
+    if (payload.id === ADMIN_DISCORD_ID) {
+      adminPanel.classList.remove('hidden');
+    } else {
+      adminPanel.classList.add('hidden');
+    }
+
+    fetchUserData(token)
+      .then(data => renderUserPanel(data))
+      .catch(() => {
+        alert('Erro ao carregar dados do usuário');
+        localStorage.removeItem('token');
+        location.reload();
+      });
+  }
+
+  btnLogout.onclick = () => {
+    localStorage.removeItem('token');
+    location.reload();
+  };
+
+  // Compra de plano - evento delegado
+  plansList.addEventListener('click', e => {
+    if (e.target.classList.contains('btn-comprar-plano')) {
+      const planId = e.target.dataset.id;
+      alert(`Compra do plano ${planId} - você deve implementar a integração real`);
+    }
+  });
+
+  // Novo ticket - evento simples
+  btnNewTicket.onclick = () => {
+    const assunto = prompt('Descreva o assunto do ticket:');
+    if (assunto) alert(`Ticket criado: ${assunto} (implemente backend)`);
+  };
+
+  // Inicia a app ao carregar
+  window.onload = () => {
+    handleOAuthCallback().then(() => initApp());
+  };
+</script>
 </body>
 </html>
