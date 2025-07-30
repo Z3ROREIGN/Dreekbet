@@ -1,43 +1,71 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>DreekBet - Login via Discord</title>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;600&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="styles.css" />
-<link rel="icon" href="favicon.ico" type="image/x-icon" />
+  <meta charset="UTF-8" />
+  <title>DreekBet - Login</title>
+  <style>
+    body {
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #1f1c2c, #928dab);
+      color: #eee;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .container {
+      background: rgba(0, 0, 0, 0.5);
+      padding: 40px;
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+      text-align: center;
+      width: 320px;
+    }
+    h1 {
+      margin-bottom: 20px;
+      color: #61dafb;
+    }
+    p {
+      font-size: 18px;
+      margin-bottom: 30px;
+    }
+    a.button {
+      background-color: #61dafb;
+      color: #000;
+      padding: 12px 24px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: bold;
+      display: inline-block;
+      transition: background-color 0.3s ease;
+    }
+    a.button:hover {
+      background-color: #21a1f1;
+    }
+  </style>
 </head>
 <body>
-
-<header>
   <div class="container">
-    <h1 class="logo">DreekBet</h1>
-    <nav>
-      <ul>
-        <li><a href="index.html">Home</a></li>
-        <li><a href="produtos.html">Produtos</a></li>
-        <li><a href="carrinho.html">Carrinho</a></li>
-        <li><a href="login.html" class="active">Login</a></li>
-      </ul>
-    </nav>
+    <h1>Bem-vindo ao DreekBet</h1>
+    <p id="welcomeMsg">Carregando...</p>
+    <a
+      class="button"
+      href="https://discord.com/api/oauth2/authorize?client_id=1358987708579709042&redirect_uri=https%3A%2F%2Fdreekbet.shop%2Fapi%2Fauth&response_type=code&scope=identify%20email"
+      >Entrar com Discord</a
+    >
   </div>
-</header>
 
-<main class="container" style="padding: 4rem 0; text-align: center;">
-  <h2>Faça login via Discord para continuar</h2>
-  <p style="margin: 1rem 0 2rem; font-weight: 300; font-size: 1.1rem;">
-    Entre com sua conta Discord para comprar e hospedar seus bots automaticamente.
-  </p>
-  <a href="/api/auth" class="btn-primary" style="padding: 1rem 3rem; font-size: 1.2rem;">
-    Login com Discord
-  </a>
-</main>
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const user = urlParams.get("user");
+    const welcomeMsg = document.getElementById("welcomeMsg");
 
-<footer>
-  <p>© 2025 DreekBet. Todos os direitos reservados.</p>
-</footer>
-
-<script src="scripts.js"></script>
+    if (user) {
+      welcomeMsg.textContent = `Olá, ${user}! Você está logado.`;
+    } else {
+      welcomeMsg.textContent = "Por favor, faça login usando o botão abaixo.";
+    }
+  </script>
 </body>
 </html>
