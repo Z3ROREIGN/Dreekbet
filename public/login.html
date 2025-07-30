@@ -1,23 +1,37 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <title>Login - DreekBet</title>
-  <link rel="stylesheet" href="styles.css" />
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>DreekBet - Login via Discord</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="styles.css" />
+<link rel="icon" href="favicon.ico" type="image/x-icon" />
 </head>
 <body>
+
 <header>
-  <h1>DreekBet - Login</h1>
-  <nav>
-    <a href="index.html">Home</a>
-    <a href="produtos.html">Produtos</a>
-    <a href="carrinho.html">Carrinho</a>
-  </nav>
+  <div class="container">
+    <h1 class="logo">DreekBet</h1>
+    <nav>
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="produtos.html">Produtos</a></li>
+        <li><a href="carrinho.html">Carrinho</a></li>
+        <li><a href="login.html" class="active">Login</a></li>
+      </ul>
+    </nav>
+  </div>
 </header>
 
-<main>
+<main class="container" style="padding: 4rem 0; text-align: center;">
   <h2>Faça login via Discord para continuar</h2>
-  <a href="/api/auth"><button>Login com Discord</button></a>
+  <p style="margin: 1rem 0 2rem; font-weight: 300; font-size: 1.1rem;">
+    Entre com sua conta Discord para comprar e hospedar seus bots automaticamente.
+  </p>
+  <a href="/api/auth" class="btn-primary" style="padding: 1rem 3rem; font-size: 1.2rem;">
+    Login com Discord
+  </a>
 </main>
 
 <footer>
@@ -27,4 +41,3 @@
 <script src="scripts.js"></script>
 </body>
 </html>
-
