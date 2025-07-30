@@ -1,19 +1,25 @@
 const express = require('express');
-const fetch = require('node-fetch'); // versão 2.x para require
+const fetch = require('node-fetch');
+const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+const ADMIN_ID = '1098745384848859258';
+const JWT_SECRET = process.env.JWT_SECRET || 'troque_esse_segredo';
+
+app.use(express.json());
+
 app.get('/api/auth', async (req, res) => {
   const code = req.query.code;
   if (!code) return res.status(400).send("Código 'code' ausente.");
 
-  const redirectUri = 'https://dreekbet.shop/api/auth'; // seu redirect_uri registrado no Discord
+  const redirectUri = 'https://dreekbet.shop/api/auth';
 
   const params = new URLSearchParams({
-    client_id: '1391419432257060914', // Client ID fixo
-    client_secret: process.env.DISCORD_CLIENT_SECRET, // Seu segredo da env
+    client_id: '1391419432257060914',
+    client_secret: process.env.DISCORD_CLIENT_SECRET,
     grant_type: 'authorization_code',
     code,
     redirect_uri: redirectUri,
@@ -21,7 +27,6 @@ app.get('/api/auth', async (req, res) => {
   });
 
   try {
-    // Troca o code pelo token
     const tokenRes = await fetch('https://discord.com/api/oauth2/token', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -39,7 +44,6 @@ app.get('/api/auth', async (req, res) => {
       return res.status(400).json({ error: "Não recebeu access_token", data: tokenData });
     }
 
-    // Pega os dados do usuário
     const userRes = await fetch('https://discord.com/api/users/@me', {
       headers: { Authorization: `Bearer ${tokenData.access_token}` }
     });
@@ -51,10 +55,19 @@ app.get('/api/auth', async (req, res) => {
 
     const userData = await userRes.json();
 
-    // Aqui você pode criar e assinar JWT, mas vamos retornar o usuário direto pra teste
-    // Depois no frontend você pode salvar isso e seguir com seu sistema
+    // Cria JWT com os dados do usuário e se é admin
+    const payload = {
+      id: userData.id,
+      username: userData.username,
+      discriminator: userData.discriminator,
+      isAdmin: userData.id === ADMIN_ID
+    };
 
-    return res.json({ user: userData });
+    const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '12h' });
+
+    // Retorna token e usuário para o frontend
+    return res.json({ token, user: payload });
+
   } catch (err) {
     console.error(err);
     return res.status(500).send("Erro interno na autenticação.");
