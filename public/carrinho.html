@@ -2,32 +2,42 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8" />
-<title>Carrinho - DreekBet</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>DreekBet - Carrinho</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;600&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="styles.css" />
+<link rel="icon" href="favicon.ico" type="image/x-icon" />
 </head>
 <body>
+
 <header>
-  <h1>Carrinho - DreekBet</h1>
-  <nav>
-    <a href="index.html">Home</a>
-    <a href="produtos.html">Produtos</a>
-    <a href="login.html">Login</a>
-  </nav>
+  <div class="container">
+    <h1 class="logo">DreekBet</h1>
+    <nav>
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="produtos.html">Produtos</a></li>
+        <li><a href="carrinho.html" class="active">Carrinho</a></li>
+        <li><a href="login.html">Login</a></li>
+      </ul>
+    </nav>
+  </div>
 </header>
 
-<main>
-  <h2>Itens no seu carrinho</h2>
-  <div id="itens-carrinho"></div>
-  <button onclick="finalizarCompra()">Finalizar Compra</button>
-  <button onclick="limparCarrinho()">Limpar Carrinho</button>
-  <div id="msg-status"></div>
+<main class="container" style="padding: 3rem 0;">
+  <h2>Seu Carrinho</h2>
+  <div id="itens-carrinho" style="margin-top: 2rem;"></div>
+
+  <div style="margin-top: 3rem; display: flex; gap: 1rem;">
+    <button onclick="limparCarrinho()" class="btn-primary" style="background:#f44336;">Limpar Carrinho</button>
+    <button onclick="finalizarCompra()" class="btn-primary">Finalizar Compra</button>
+  </div>
 </main>
 
 <footer>
-  <p>© 2025 DreekBet.</p>
+  <p>© 2025 DreekBet. Todos os direitos reservados.</p>
 </footer>
 
 <script src="scripts.js"></script>
 </body>
 </html>
-
