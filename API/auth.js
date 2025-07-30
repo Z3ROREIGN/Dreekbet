@@ -6,11 +6,11 @@ export default async function handler(req, res) {
   }
 
   const params = new URLSearchParams({
-    client_id: process.env.DISCORD_CLIENT_ID,
+    client_id: "1358987708579709042",
     client_secret: process.env.DISCORD_CLIENT_SECRET,
     grant_type: "authorization_code",
     code,
-    redirect_uri: process.env.DISCORD_REDIRECT_URI, // https://dreekbet.shop/api/auth
+    redirect_uri: "https://dreekbet.shop/api/auth", // FIXO para evitar erro
     scope: "identify email"
   });
 
