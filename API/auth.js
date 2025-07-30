@@ -2,7 +2,7 @@ export default async function handler(req, res) {
   const code = req.query.code;
 
   if (!code) {
-    return res.status(400).send("Código ausente na URL.");
+    return res.status(400).json({ error: "Código ausente na URL." });
   }
 
   const params = new URLSearchParams();
@@ -36,10 +36,9 @@ export default async function handler(req, res) {
 
     const userData = await userResponse.json();
 
-    // Redireciona com o nome do usuário após autenticar
     return res.redirect(`/login.html?user=${encodeURIComponent(userData.username)}`);
   } catch (err) {
     console.error(err);
-    return res.status(500).send("Erro ao autenticar.");
+    return res.status(500).json({ error: "Erro ao autenticar com o Discord." });
   }
 }
