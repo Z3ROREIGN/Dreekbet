@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>DreekBet - Painel</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
+  <style>
+    .profile {
+      max-width: 700px;
+      margin: 2rem auto;
+      background: rgba(15, 32, 39, 0.75);
+      padding: 2rem;
+      border-radius: 15px;
+      box-shadow: 0 4px 15px rgba(0, 216, 255, 0.3);
+      display: flex;
+      gap: 2rem;
+      align-items: center;
+      color: #00d8ff;
+    }
+    .avatar {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      border: 3px solid #00d8ff;
+      box-shadow: 0 0 20px #00d8ffaa;
+    }
+    .user-info h2 {
+      margin: 0 0 0.3rem 0;
+      font-size: 2rem;
+      text-shadow: 0 0 8px #00d8ffbb;
+    }
+    .user-info p {
+      font-weight: 300;
+      color: #a0cce0;
+      margin: 0.2rem 0 0 0;
+    }
+    .admin-badge {
+      display: inline-block;
+      background: #00d8ff;
+      color: #011627;
+      padding: 4px 12px;
+      border-radius: 50px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      margin-left: 10px;
+      box-shadow: 0 0 15px #00d8ffcc;
+    }
+    .section-title {
+      text-align: center;
+      font-size: 2rem;
+      font-weight: 600;
+      margin: 3rem 0 1.5rem 0;
+      color: #00d8ff;
+      text-shadow: 0 0 10px #00d8ffcc;
+    }
+    .bot-list, .produtos-lista {
+      max-width: 900px;
+      margin: 0 auto 3rem auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit,minmax(280px,1fr));
+      gap: 2rem;
+    }
+    .bot-card, .produto-card {
+      background: rgba(15, 32, 39, 0.75);
+      border-radius: 15px;
+      padding: 1.8rem 1.2rem;
+      box-shadow: 0 4px 15px rgba(0,216,255,0.2);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: transform 0.3s ease;
+      color: #d0e8ffbb;
+    }
+    .bot-card:hover, .produto-card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 6px 25px rgba(0,216,255,0.5);
+    }
+    .bot-card h4, .produto-card h4 {
+      color: #00d8ff;
+      margin-bottom: 1rem;
+      text-shadow: 0 0 8px #00d8ffcc;
+    }
+    .btn-action {
+      background: #00d8ff;
+      color: #011627;
+      font-weight: 700;
+      padding: 0.7rem 1.8rem;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: background-color 0.3s ease, box-shadow 0.3s ease;
+      box-shadow: 0 0 18px #00d8ffaa;
+      align-self: center;
+      margin-top: 1rem;
+      text-decoration: none;
+      text-align: center;
+    }
+    .btn-action:hover {
+      background: #00b0cc;
+      box-shadow: 0 0 30px #00b0ccdd;
+    }
+    .hidden {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <div class="logo">DreekBet</div>
+      <nav>
+        <ul>
+          <li><a href="painel.html" class="active">Painel</a></li>
+          <li><a href="produtos.html">Produtos</a></li>
+          <li><a href="login.html" id="logoutBtn">Sair</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="profile" id="profileSection" style="display:none;">
+      <img src="" alt="Avatar" class="avatar" id="avatar" />
+      <div class="user-info">
+        <h2 id="username">Usuário</h2>
+        <p>ID: <span id="userId"></span></p>
+        <p id="adminBadge" class="admin-badge hidden">ADMIN</p>
+      </div>
+    </section>
+
+    <h3 class="section-title">Seus Bots Hospedados</h3>
+    <div class="bot-list" id="botList">
+      <!-- Bots aparecerão aqui -->
+    </div>
+
+    <h3 class="section-title">Produtos Disponíveis</h3>
+    <div class="produtos-lista" id="produtosLista">
+      <!-- Produtos aparecerão aqui -->
+    </div>
+
+    <div style="max-width:900px;margin: 0 auto 4rem auto;text-align:center;">
+      <button class="btn-action" id="btnCriarBot">Criar Novo Bot</button>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
+  <script>
+    // Pega token da URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const token = urlParams.get('token');
+
+    if (!token) {
+      alert('Você precisa estar logado!');
+      window.location.href = 'login.html';
+    }
+
+    let user = null;
+
+    try {
+      user = jwt_decode(token);
+    } catch {
+      alert('Token inválido ou expirado!');
+      window.location.href = 'login.html';
+    }
+
+    // Exibe perfil
+    const avatarURL = user.avatar
+      ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=128`
+      : 'https://cdn.discordapp.com/embed/avatars/0.png';
+
+    document.getElementById('avatar').src = avatarURL;
+    document.getElementById('username').textContent = `${user.username}#${user.discriminator}`;
+    document.getElementById('userId').textContent = user.id;
+    if (user.isAdmin) {
+      document.getElementById('adminBadge').classList.remove('hidden');
+    }
+    document.getElementById('profileSection').style.display = 'flex';
+
+    // Mock: bots do usuário (você deve buscar da sua API)
+    const bots = [
+      { id: '1234', name: 'Bot Teste 1', status: 'online' },
+      { id: '5678', name: 'Bot Teste 2', status: 'offline' },
+    ];
+
+    const botList = document.getElementById('botList');
+    if (bots.length === 0) {
+      botList.innerHTML = '<p style="color:#aaa;text-align:center;">Nenhum bot hospedado.</p>';
+    } else {
+      bots.forEach(bot => {
+        const botCard = document.createElement('div');
+        botCard.className = 'bot-card';
+        botCard.innerHTML = `
+          <h4>${bot.name}</h4>
+          <p>Status: <strong style="color:${bot.status === 'online' ? '#00ff00' : '#ff5555'}">${bot.status}</strong></p>
+          <button class="btn-action" onclick="alert('Função para gerenciar bot ainda não implementada')">Gerenciar</button>
+        `;
+        botList.appendChild(botCard);
+      });
+    }
+
+    // Mock: produtos (você deve buscar da sua API)
+    const produtos = [
+      { id: 'p1', nome: 'Plano Básico', descricao: 'Hospede seu bot com 512MB RAM.', preco: 'R$10,00' },
+      { id: 'p2', nome: 'Plano Pro', descricao: 'Hospede seu bot com 1GB RAM.', preco: 'R$20,00' },
+      { id: 'p3', nome: 'Plano Ultra', descricao: 'Hospede seu bot com 2GB RAM e suporte VIP.', preco: 'R$40,00' },
+    ];
+
+    const produtosLista = document.getElementById('produtosLista');
+    produtos.forEach(p => {
+      const card = document.createElement('div');
+      card.className = 'produto-card';
+      card.innerHTML = `
+        <h4>${p.nome}</h4>
+        <p>${p.descricao}</p>
+        <p><strong>Preço: </strong>${p.preco}</p>
+        <button class="btn-action" onclick="alert('Comprar ${p.nome} em breve!')">Comprar</button>
+      `;
+      produtosLista.appendChild(card);
+    });
+
+    // Botão criar bot
+    document.getElementById('btnCriarBot').addEventListener('click', () => {
+      alert('Aqui abriria o sistema de criação de bots (em desenvolvimento)');
+    });
+
+    // Logout
+    document.getElementById('logoutBtn').addEventListener('click', e => {
+      e.preventDefault();
+      window.location.href = 'login.html';
+    });
+  </script>
+</body>
+  </html>
+  
