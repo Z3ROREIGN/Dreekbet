@@ -156,10 +156,9 @@
     </div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/jsonwebtoken@9.0.0/index.min.js"></script>
   <script>
     const clientId = '1391419432257060914';
-    const redirectUri = 'https://dreekbet.shop/api/auth';
+    const redirectUri = 'https://dreekbet.shop/login.html';
     const scope = 'identify email';
     const loginButton = document.getElementById('loginButton');
     const welcomeMsg = document.getElementById('welcomeMsg');
@@ -180,14 +179,12 @@
 
     loginButton.href = `https://discord.com/api/oauth2/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${encodeURIComponent(scope)}`;
 
-    // Sair e limpar localStorage
     logoutBtn.onclick = () => {
       localStorage.removeItem('jwtToken');
       localStorage.removeItem('user');
       window.location.href = window.location.pathname;
     };
 
-    // Pega parâmetro da URL
     function getQueryParam(param) {
       const params = new URLSearchParams(window.location.search);
       return params.get(param);
@@ -209,7 +206,7 @@
       window.history.replaceState({}, document.title, window.location.pathname);
     }
 
-    // Simula tickets no frontend (normalmente ficaria no banco)
+    // Simula tickets no frontend (ideal: salvar no backend)
     let tickets = [];
 
     function renderTickets() {
@@ -217,9 +214,9 @@
         ticketsList.innerHTML = '<p style="color:#777;">Nenhum ticket aberto.</p>';
         return;
       }
-      ticketsList.innerHTML = tickets.map((t, i) => 
+      ticketsList.innerHTML = tickets.map((t, i) =>
         `<div style="padding:0.3rem 0; border-bottom:1px solid #00d8ff44;">
-          <strong>Ticket #${i+1}:</strong> ${t}
+          <strong>Ticket #${i + 1}:</strong> ${t}
         </div>`).join('');
     }
 
@@ -273,13 +270,15 @@
 
         manageOrdersBtn.onclick = () => {
           adminOutput.textContent = 'Exemplo: Listando pedidos pendentes...';
-          // Aqui você faria requisições para backend e exibiria dados reais
+          // Implementar integração backend aqui
         };
         manageStockBtn.onclick = () => {
           adminOutput.textContent = 'Exemplo: Gerenciando estoque...';
+          // Implementar integração backend aqui
         };
         supportUsersBtn.onclick = () => {
           adminOutput.textContent = 'Exemplo: Atendendo usuários via tickets...';
+          // Implementar integração backend aqui
         };
       } else {
         adminPanel.style.display = 'none';
