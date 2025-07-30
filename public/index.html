@@ -1,1 +1,63 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>DreekBet - Aposte na sua Aplicação 🛍️</title>
 
+  <!-- Link para o CSS -->
+  <link rel="stylesheet" href="styles.css" />
+
+  <!-- Favicon (opcional) -->
+  <link rel="icon" href="favicon.ico" type="image/x-icon" />
+</head>
+<body>
+  <header>
+    <div class="container">
+      <h1 class="logo">DreekBet</h1>
+      <nav>
+        <ul>
+          <li><a href="index.html" class="active">Home</a></li>
+          <li><a href="produtos.html">Produtos</a></li>
+          <li><a href="carrinho.html">Carrinho</a></li>
+          <li><a href="login.html">Login</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero container">
+      <h2>Aposte na sua Aplicação com DreekBet</h2>
+      <p>Os melhores bots para Discord para turbinar seu servidor e negócios.</p>
+      <a href="produtos.html" class="btn-primary">Confira os Produtos</a>
+    </section>
+
+    <section class="produtos-destaque container">
+      <h3>Produtos em destaque</h3>
+      <div class="produtos-lista">
+        <article class="produto-card">
+          <h4>Bot Verificador</h4>
+          <p>Detecta usuários suspeitos e aplica punições automaticamente.</p>
+          <button onclick="adicionarAoCarrinho(1, 'Bot Verificador', 49.99)">Adicionar ao Carrinho</button>
+        </article>
+
+        <article class="produto-card">
+          <h4>Bot de Vendas</h4>
+          <p>Automatize suas vendas dentro do Discord facilmente.</p>
+          <button onclick="adicionarAoCarrinho(2, 'Bot de Vendas', 69.99)">Adicionar ao Carrinho</button>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      <p>© 2025 DreekBet. Todos os direitos reservados.</p>
+    </div>
+  </footer>
+
+  <!-- Link para o JS -->
+  <script src="scripts.js"></script>
+</body>
+</html>
